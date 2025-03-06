@@ -1,8 +1,20 @@
 # indexer-tools
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.4.0-beta5](https://img.shields.io/badge/AppVersion-v3.4.0--beta5-informational?style=flat-square)
+![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v3.4.0](https://img.shields.io/badge/AppVersion-v3.4.0-informational?style=flat-square)
 
 A Helm chart for Indexer Tools frontend application
+
+**Homepage:** <https://nodeify.net>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| vince | <vince@nodeify.net> |  |
+
+## Source Code
+
+* <https://indexer-tools.vincenttaglia.com/>
 
 ## Values
 
@@ -14,7 +26,7 @@ A Helm chart for Indexer Tools frontend application
 | env.variables[1].name | string | `"GRAPH_API_KEY"` |  |
 | env.variables[1].value | string | `"<api-key>"` |  |
 | env.variables[2].name | string | `"DEFAULT_ACCOUNTS"` |  |
-| env.variables[2].value | string | `"[ { \"address\": \"0x550c1f4814a85aa10f5f061ca8c45e2ee9620226\", \"name\": \"exerimental\", \"active\": true, \"chain\": \"arbitrum-one\", \"agentConnect\": true, \"agentEndpoint\": \"/agent\", \"poiQuery\": false, \"poiQueryEndpoint\": \"\" } ]"` |  |
+| env.variables[2].value | string | `"[ { \"address\": \"0x.............\", \"name\": \"my-indexer-name\", \"active\": true, \"chain\": \"arbitrum-one\", \"agentConnect\": true, \"agentEndpoint\": \"/agent\", \"poiQuery\": false, \"poiQueryEndpoint\": \"\" } ]"` |  |
 | env.variables[3].name | string | `"DEFAULT_QOS_SUBGRAPH"` |  |
 | env.variables[3].value | string | `"https://gateway.thegraph.com/api/[api-key]/subgraphs/id/Dtr9rETvwokot4BSXaD5tECanXfqfJKcvHuaaEgPDD2D"` |  |
 | env.variables[4].name | string | `"DEFAULT_SUBGRAPH_MAINNET"` |  |
@@ -42,8 +54,14 @@ A Helm chart for Indexer Tools frontend application
 | healthCheck.readinessProbe.timeoutSeconds | int | `5` |  |
 | image.pullPolicy | string | `"IfNotPresent"` |  |
 | image.repository | string | `"ghcr.io/vincenttaglia/indexer-tools"` |  |
-| image.tag | string | `"v3.4.0-beta5"` |  |
+| image.tag | string | `""` |  |
 | imagePullSecrets | list | `[]` |  |
+| ingress.className | string | `"traefik"` |  |
+| ingress.enabled | bool | `false` |  |
+| ingress.host | string | `"indexer-tools.example.com"` |  |
+| ingress.path | string | `"/"` |  |
+| ingress.tls.enabled | bool | `true` |  |
+| ingress.tls.secretName | string | `"indexer-tools-tls"` |  |
 | nameOverride | string | `""` |  |
 | nodeSelector | object | `{}` |  |
 | podAnnotations | object | `{}` |  |

@@ -6,7 +6,7 @@ fullnameOverride: ""
 
 image:
   repository: ghcr.io/vincenttaglia/indexer-tools
-  tag: "v3.4.0-beta5"
+  tag: ""
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -15,6 +15,23 @@ serviceAccount:
   create: true
   annotations: {}
   name: ""
+
+ingress:
+  # Enable or disable Ingress for the service
+  enabled: false
+  # Specifies the Ingress class to use.
+  # Use "traefik" for Traefik Ingress or "nginx" for NGINX Ingress.
+  className: "traefik"  
+  # The hostname for the Ingress.
+  # Requests to this domain will be routed to the service.
+  host: "indexer-tools.example.com"  
+  # The path that will be matched for routing traffic to the service.
+  path: "/"  
+  tls:
+    # Enable TLS/SSL encryption for secure connections
+    enabled: true  
+    # Name of the Kubernetes Secret containing the TLS certificate for HTTPS
+    secretName: "indexer-tools-tls"  
 
 env:
   variables:

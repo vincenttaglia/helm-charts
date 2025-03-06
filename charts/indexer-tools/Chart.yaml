@@ -2,7 +2,7 @@ apiVersion: v2
 name: indexer-tools
 description: A Helm chart for Indexer Tools frontend application
 type: application
-version: 2.0.0
+version: 2.1.0
 appVersion: "v3.4.0"
 maintainers:
   - name: vince
