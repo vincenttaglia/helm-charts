@@ -2,7 +2,7 @@ apiVersion: v2
 name: cosmoshub-rpc
 description: A Helm chart for deploying a Cosmoshub node
 type: application
-version: 1.0.0
+version: 1.0.1
 appVersion: v21.0.0
 maintainers:
   - name: vince
