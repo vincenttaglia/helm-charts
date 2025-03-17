@@ -15,24 +15,9 @@
       "datasourceTemplate": "docker"
     }
   ],
-  "packageRules": [
-    {
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchUpdateTypes": [
-        "major",
-        "minor",
-        "patch"
-      ],
-      "bumpVersion": "patch"
-    }
-  ],
-  "helm-requirements": {
-    "enabled": true
-  },
   "helmv3": {
     "enabled": true
   },
-  "bumpVersion": "patch"
+  "postUpdateOptions": ["bumpChartVersion"],
+  "commitMessageExtra": "and update chart to {{newVersion}}"
 }
