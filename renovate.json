@@ -1,13 +1,23 @@
 {
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
-  "logLevel": "debug",
-  "enabledManagers": ["regex", "helm-values", "kubernetes"],
+  "kubernetes": {
+    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
+  },
   "regexManagers": [
+    {
+      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "matchStrings": [
+        "name:\\s*\"?(?<name>[^\\s\"]+)\"?[\\s\\S]*?appVersion:\\s*\"?(?<currentValue>[^\\s\"]+)\"?"
+      ],
+      "currentValueTemplate": "{{#if currentValue}}{{currentValue}}{{else}}latest{{/if}}",
+      "depNameTemplate": "{{lookup ../values.yaml image.repository}}",
+      "datasourceTemplate": "docker"
+    },
     {
       "fileMatch": ["(^|/)values\\.yaml$"],
       "matchStrings": [
-        "repository:\\s*(?<depName>[^\\s\\n]+)[\\s\\S]*?tag:\\s*\"?(?<currentValue>[^\\s\"\\n]*)?\"?"
+        "image:\\s*\\n\\s+repository:\\s*(?<depName>[^\\s]+)\\s*\\n\\s+pullPolicy:[^\\n]+\\n\\s+tag:\\s*\"?(?<currentValue>[^\\s\"]+)?\"?"
       ],
       "currentValueTemplate": "{{#if currentValue}}{{currentValue}}{{else}}latest{{/if}}",
       "datasourceTemplate": "docker"
