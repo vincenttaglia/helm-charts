@@ -1,27 +1,99 @@
-name: Release Charts
-
+name: Helm Chart Management
 on:
   push:
     branches:
       - main
+    paths:
+      - 'charts/**'
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'charts/**'
 
 jobs:
-  release:
-    permissions:
-      contents: write
+  bump-version:
+    name: Bump Chart Version
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Check for appVersion changes
+        id: check-changes
+        run: |
+          CHANGED_CHARTS=$(git diff --name-only origin/${{ github.base_ref }} | grep "Chart.yaml" || echo "")
+          if [ -n "$CHANGED_CHARTS" ]; then
+            echo "changed_charts=$CHANGED_CHARTS" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Bump chart versions
+        if: steps.check-changes.outputs.changed_charts != ''
+        run: |
+          git config user.name "GitHub Action"
+          git config user.email "action@github.com"
+          
+          for chart_yaml in ${{ steps.check-changes.outputs.changed_charts }}; do
+            if git diff origin/${{ github.base_ref }} $chart_yaml | grep -q "appVersion:"; then
+              echo "Bumping version in $chart_yaml"
+              
+              # Get current version
+              current_version=$(grep "^version:" "$chart_yaml" | sed 's/version: //' | tr -d '"' | tr -d "'")
+              
+              # Split into components
+              IFS='.' read -r major minor patch <<< "$current_version"
+              
+              # Increment patch version
+              new_patch=$((patch + 1))
+              new_version="$major.$minor.$new_patch"
+              
+              # Update version in file
+              sed -i "s/^version: .*/version: $new_version/" "$chart_yaml"
+              
+              git add "$chart_yaml"
+            fi
+          done
+          
+          if git diff --staged --quiet; then
+            echo "No chart versions to bump"
+          else
+            git commit -m "chore: Bump chart versions for Docker image updates"
+            git push
+          fi
+
+  release:
+    name: Release Charts
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add stable https://charts.helm.sh/stable
 
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         env:
           CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          CR_SKIP_EXISTING: "true"

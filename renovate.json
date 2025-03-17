@@ -18,15 +18,5 @@
   "helmv3": {
     "enabled": true
   },
-  "postUpgradeTasks": {
-    "commands": [
-      "sed -i 's/^version: \\([0-9]\\+\\.[0-9]\\+\\.[0-9]\\+\\)/version: \\1.PLACEHOLDER/' \"${1}\"",
-      "sed -i 's/\\([0-9]\\+\\.[0-9]\\+\\.\\)[0-9]\\+\\.PLACEHOLDER/\\1'$(($( sed -n 's/^version: .*\\.\\([0-9]\\+\\)\\.PLACEHOLDER/\\1/p' \"${1}\" )+1))'/' \"${1}\""
-    ],
-    "fileFilters": [
-      "charts/*/Chart.yaml"
-    ],
-    "executionMode": "update"
-  },
   "recreateClosed": true
 }
