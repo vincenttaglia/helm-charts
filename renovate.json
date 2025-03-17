@@ -1,32 +1,16 @@
 {
-  "extends": [
-    "config:recommended"
-  ],
+  "extends": ["config:recommended"],
   "dependencyDashboard": true,
-  "packageRules": [
+  "regexManagers": [
     {
-      "matchCategories": [
-        "docker"
+      "description": "Update appVersion in Chart.yaml based on Docker image",
+      "fileMatch": ["\\.yaml$"],
+      "matchStrings": [
+        "repository:\\s*(?<depName>[^\\s]+)[\\s\\S]*?Chart\\.appVersion"
       ],
-      "enabled": true
-    },
-    {
-      "matchDatasources": [
-        "helm"
-      ],
-      "enabled": true
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker",
+      "extractVersionTemplate": "^v?(?<version>.*)$"
     }
-  ],
-  "helm-values": {
-    "fileMatch": [
-      "(^|/)values\\.yaml$",
-      "(^|/)values-.*\\.yaml$"
-    ]
-  },
-  "kubernetes": {
-    "fileMatch": [
-      "(^|/)values\\.yaml$",
-      "(^|/)values-.*\\.yaml$"
-    ]
-  }
+  ]
 }
