@@ -19,5 +19,6 @@
     "enabled": true
   },
   "postUpdateOptions": ["bumpChartVersion"],
-  "commitMessageExtra": "and update chart to {{newVersion}}"
+  "commitMessageExtra": "and update chart to {{newVersion}}",
+  "recreateClosed": true
 }
