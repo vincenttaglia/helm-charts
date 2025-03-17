@@ -1,10 +1,14 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:base"],
+  "extends": [
+    "config:recommended"
+  ],
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^charts/.+/Chart\\.yaml$"],
+      "fileMatch": [
+        "^charts/.+/Chart\\.yaml$"
+      ],
       "matchStrings": [
         "appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?[\\s\\S]*?lookupName:\\s*\"?(?<depName>[^\"\\s]+)\"?"
       ],
@@ -13,12 +17,20 @@
   ],
   "packageRules": [
     {
-      "matchDatasources": ["docker"],
-      "matchUpdateTypes": ["major", "minor", "patch"],
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchUpdateTypes": [
+        "major",
+        "minor",
+        "patch"
+      ],
       "bumpVersion": "patch"
     },
     {
-      "matchDatasources": ["helm"],
+      "matchDatasources": [
+        "helm"
+      ],
       "bumpVersion": "patch"
     }
   ],
@@ -28,5 +40,7 @@
   "helmv3": {
     "enabled": true
   },
-  "postUpdateOptions": ["helmUpdateSubChartArchives"]
+  "postUpdateOptions": [
+    "helmUpdateSubChartArchives"
+  ]
 }
