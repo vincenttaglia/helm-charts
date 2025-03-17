@@ -1,20 +1,7 @@
 {
   "extends": [
-    "config:recommended"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "Chart\\.yaml$"
-      ],
-      "matchStrings": [
-        "appVersion:\\s*\"(?<currentValue>.*?)\""
-      ],
-      "datasourceTemplate": "docker",
-      "depNameTemplate": "{{#if repository}}{{{repository}}}/{{/if}}{{{image}}}",
-      "extractVersionTemplate": "^.*$"
-    }
+    "config:recommended",
+    "helm-values"
   ],
   "dependencyDashboard": true
 }
