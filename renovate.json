@@ -1,25 +1,14 @@
 {
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
-  "kubernetes": {
-    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
-  },
+  "separateMajorMinor": true,
   "regexManagers": [
     {
-      "fileMatch": ["(^|/)Chart\\.yaml$"],
+      "fileMatch": ["^.*\\/Chart\\.yaml$"],
       "matchStrings": [
-        "name:\\s*\"?(?<name>[^\\s\"]+)\"?[\\s\\S]*?appVersion:\\s*\"?(?<currentValue>[^\\s\"]+)\"?"
+        "name: (?<chartName>[^\\s]+)[\\s\\S]*?appVersion: ['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
       ],
-      "currentValueTemplate": "{{#if currentValue}}{{currentValue}}{{else}}latest{{/if}}",
-      "depNameTemplate": "{{lookup ../values.yaml image.repository}}",
-      "datasourceTemplate": "docker"
-    },
-    {
-      "fileMatch": ["(^|/)values\\.yaml$"],
-      "matchStrings": [
-        "image:\\s*\\n\\s+repository:\\s*(?<depName>[^\\s]+)\\s*\\n\\s+pullPolicy:[^\\n]+\\n\\s+tag:\\s*\"?(?<currentValue>[^\\s\"]+)?\"?"
-      ],
-      "currentValueTemplate": "{{#if currentValue}}{{currentValue}}{{else}}latest{{/if}}",
+      "depNameTemplate": "{{lookup values.yaml image.repository}}",
       "datasourceTemplate": "docker"
     }
   ]
