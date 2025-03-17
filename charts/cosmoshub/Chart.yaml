@@ -2,7 +2,7 @@ apiVersion: v2
 name: cosmoshub-rpc
 description: A Helm chart for deploying a Cosmoshub node
 type: application
-version: 1.0.2
+version: 1.0.3
 appVersion: v21.0.0
 maintainers:
   - name: vince
@@ -11,6 +11,8 @@ keywords:
   - cosmoshub
   - blockchain
   - rpc
+annotations:
+  lookupName: "ghcr.io/cosmos/gaia"
 home: https://nodeify.net
 sources:
   - https://github.com/cosmos/gaia
