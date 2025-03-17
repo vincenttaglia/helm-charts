@@ -13,30 +13,18 @@
         "appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?[\\s\\S]*?lookupName:\\s*\"?(?<depName>[^\"\\s]+)\"?"
       ],
       "datasourceTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "^charts/.+/Chart\\.yaml$"
-      ],
-      "matchStrings": [
-        "version: (?<currentValue>[0-9]+\\.[0-9]+\\.[0-9]+)"
-      ],
-      "depNameTemplate": "{{ packageFile }}",
-      "datasourceTemplate": "git",
-      "autoReplaceStringTemplate": "version: {{#if isPatch}}{{replace '\\d+$' (add (parseInt (extract currentValue '\\d+$')) 1) currentValue}}{{else}}{{currentValue}}{{/if}}"
     }
   ],
   "helmv3": {
-    "enabled": true
+    "enabled": true,
+    "bumpVersion": "patch"
   },
-  "postUpdateOptions": ["bumpChartVersion"],
+  "postUpdateOptions": ["helmUpdateSubChartArchives", "bumpChartVersion"],
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "extractVersion": "^v(?<version>.*)$",
-      "bumpVersion": "patch",
-      "semanticCommitType": "fix"
+      "matchPaths": ["charts/**"],
+      "commitMessageExtra": "and bump chart version"
     }
   ],
   "recreateClosed": true
