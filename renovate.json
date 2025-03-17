@@ -1,0 +1,7 @@
+{
+  "extends": ["config:base"],
+  "helm-chart": {
+    "fileMatch": ["Chart.yaml$"]
+  },
+  "dependencyDashboard": true
+}
