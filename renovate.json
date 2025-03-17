@@ -1,19 +1,32 @@
 {
-  "extends": ["config:recommended"],
+  "extends": [
+    "config:recommended"
+  ],
   "dependencyDashboard": true,
   "packageRules": [
     {
-      "matchDatasources": ["helm"],
+      "matchCategories": [
+        "docker"
+      ],
+      "enabled": true
+    },
+    {
+      "matchDatasources": [
+        "helm"
+      ],
       "enabled": true
     }
   ],
   "helm-values": {
-    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
+    "fileMatch": [
+      "(^|/)values\\.yaml$",
+      "(^|/)values-.*\\.yaml$"
+    ]
   },
   "kubernetes": {
-    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
-  },
-  "docker": {
-    "enabled": true
+    "fileMatch": [
+      "(^|/)values\\.yaml$",
+      "(^|/)values-.*\\.yaml$"
+    ]
   }
 }
