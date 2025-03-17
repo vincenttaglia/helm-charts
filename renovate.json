@@ -20,5 +20,15 @@
   },
   "postUpdateOptions": ["bumpChartVersion"],
   "commitMessageExtra": "and update chart to {{newVersion}}",
-  "recreateClosed": true
+  "recreateClosed": true,
+  "regexManagers": [
+    {
+      "fileMatch": ["^charts/.+/Chart\\.yaml$"],
+      "matchStrings": [
+        "version: (?<currentValue>.*?)\\s"
+      ],
+      "depNameTemplate": "chart-version",
+      "datasourceTemplate": "npm"
+    }
+  ]
 }
