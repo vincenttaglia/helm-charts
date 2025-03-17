@@ -1,7 +1,13 @@
 {
-  "extends": [
-    "config:recommended",
-    "helm"
-  ],
-  "dependencyDashboard": true
+  "extends": ["config:recommended"],
+  "dependencyDashboard": true,
+  "regexManagers": [
+    {
+      "fileMatch": ["^values\\.yaml$", "^values-.*\\.yaml$"],
+      "matchStrings": [
+        "image:\\s*['\"]?(?<depName>[^:'\"]*)(?::(?<currentValue>[^'\"]*))?"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ]
 }
