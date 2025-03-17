@@ -7,9 +7,11 @@ snapshot:
   url: "$(curl -s https://polkachu.com/api/v2/chain_snapshots/cosmos/mainnet | jq -r .snapshot.url)"
 
 image:
-  name: ghcr.io/cosmos/gaia
-  tag: v21.0.0
-  hash: 2998c7af42d7f2f86c0d78cc6b9ffc13d36fb64de8129c5bc6cddec0eaebb889
+  repository: ghcr.io/cosmos/gaia
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag
+  # @default -- Chart.appVersion
+  tag: ""
 
 flags: 
 # - --p2p.persistent_peers=648742a99b2714a442506bd5dbefe74c40346fbd@18.225.13.106:26656,...

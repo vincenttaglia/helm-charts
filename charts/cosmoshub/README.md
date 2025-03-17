@@ -1,6 +1,6 @@
 # cosmoshub-rpc
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v21.0.0](https://img.shields.io/badge/AppVersion-v21.0.0-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v21.0.0](https://img.shields.io/badge/AppVersion-v21.0.0-informational?style=flat-square)
 
 A Helm chart for deploying a Cosmoshub node
 
@@ -23,9 +23,9 @@ A Helm chart for deploying a Cosmoshub node
 | affinity | object | `{}` |  |
 | flags | string | `nil` |  |
 | fullnameOverride | string | `""` |  |
-| image.hash | string | `"2998c7af42d7f2f86c0d78cc6b9ffc13d36fb64de8129c5bc6cddec0eaebb889"` |  |
-| image.name | string | `"ghcr.io/cosmos/gaia"` |  |
-| image.tag | string | `"v21.0.0"` |  |
+| image.pullPolicy | string | `"IfNotPresent"` |  |
+| image.repository | string | `"ghcr.io/cosmos/gaia"` |  |
+| image.tag | string | Chart.appVersion | Overrides the image tag |
 | imagePullSecrets | list | `[]` |  |
 | ingress.annotations | object | `{}` |  |
 | ingress.className | string | `""` |  |
