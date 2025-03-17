@@ -1,13 +1,19 @@
 {
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
-  "regexManagers": [
+  "packageRules": [
     {
-      "fileMatch": ["^values\\.yaml$", "^values-.*\\.yaml$"],
-      "matchStrings": [
-        "image:\\s*['\"]?(?<depName>[^:'\"]*)(?::(?<currentValue>[^'\"]*))?"
-      ],
-      "datasourceTemplate": "docker"
+      "matchDatasources": ["helm"],
+      "enabled": true
     }
-  ]
+  ],
+  "helm-values": {
+    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
+  },
+  "kubernetes": {
+    "fileMatch": ["(^|/)values\\.yaml$", "(^|/)values-.*\\.yaml$"]
+  },
+  "docker": {
+    "enabled": true
+  }
 }
