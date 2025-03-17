@@ -13,18 +13,6 @@
         "appVersion:\\s*\"?(?<currentValue>[^\"\\s]+)\"?[\\s\\S]*?lookupName:\\s*\"?(?<depName>[^\"\\s]+)\"?"
       ],
       "datasourceTemplate": "docker"
-    },
-    {
-      "customType": "regex",
-      "fileMatch": [
-        "^charts/.+/Chart\\.yaml$"
-      ],
-      "matchStrings": [
-        "version:\\s*\"?(?<currentValue>[^\"\\s]+)\"?"
-      ],
-      "depNameTemplate": "chart-version",
-      "datasourceTemplate": "helm",
-      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
@@ -45,5 +33,6 @@
   },
   "helmv3": {
     "enabled": true
-  }
+  },
+  "bumpVersion": "patch"
 }
