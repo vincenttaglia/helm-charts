@@ -1,16 +1,16 @@
 {
   "extends": ["config:recommended"],
   "dependencyDashboard": true,
+  "logLevel": "debug",
+  "enabledManagers": ["regex", "helm-values", "kubernetes"],
   "regexManagers": [
     {
-      "description": "Update appVersion in Chart.yaml based on Docker image",
-      "fileMatch": ["\\.yaml$"],
+      "fileMatch": ["(^|/)values\\.yaml$"],
       "matchStrings": [
-        "repository:\\s*(?<depName>[^\\s]+)[\\s\\S]*?Chart\\.appVersion"
+        "repository:\\s*(?<depName>[^\\s\\n]+)[\\s\\S]*?tag:\\s*\"?(?<currentValue>[^\\s\"\\n]*)?\"?"
       ],
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "docker",
-      "extractVersionTemplate": "^v?(?<version>.*)$"
+      "currentValueTemplate": "{{#if currentValue}}{{currentValue}}{{else}}latest{{/if}}",
+      "datasourceTemplate": "docker"
     }
   ]
 }
