@@ -15,6 +15,9 @@ jobs:
     name: Bump Chart Version
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,8 +37,9 @@ jobs:
       - name: Bump chart versions
         if: steps.check-changes.outputs.changed_charts != ''
         run: |
-          git config user.name "GitHub Action"
-          git config user.email "action@github.com"
+          # Configure git with a PAT instead of GITHUB_TOKEN
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           
           for chart_yaml in ${{ steps.check-changes.outputs.changed_charts }}; do
             if git diff origin/${{ github.base_ref }} $chart_yaml | grep -q "appVersion:"; then
@@ -62,7 +66,8 @@ jobs:
             echo "No chart versions to bump"
           else
             git commit -m "chore: Bump chart versions for Docker image updates"
-            git push
+            # Use the provided token for authentication
+            git push https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:${{ github.head_ref }}
           fi
 
   release:
@@ -84,7 +89,7 @@ jobs:
           git config user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Install Helm
-        uses: azure/setup-helm@v4
+        uses: azure/setup-helm@v3
         with:
           version: 'latest'
 
