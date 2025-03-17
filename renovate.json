@@ -1,7 +1,15 @@
 {
-  "extends": [
-    "config:base",
-    "helm"
+  "extends": ["config:base"],
+  "regexManagers": [
+    {
+      "fileMatch": ["Chart\\.yaml$"],
+      "matchStrings": [
+        "appVersion:\\s*\"(?<currentValue>.*?)\""
+      ],
+      "datasourceTemplate": "docker",
+      "depNameTemplate": "{{#if repository}}{{{repository}}}/{{/if}}{{{image}}}",
+      "extractVersionTemplate": "^.*$"
+    }
   ],
   "dependencyDashboard": true
 }
