@@ -10,5 +10,23 @@
       ],
       "datasourceTemplate": "docker"
     }
-  ]
+  ],
+  "packageRules": [
+    {
+      "matchDatasources": ["docker"],
+      "matchUpdateTypes": ["major", "minor", "patch"],
+      "bumpVersion": "patch"
+    },
+    {
+      "matchDatasources": ["helm"],
+      "bumpVersion": "patch"
+    }
+  ],
+  "helm-requirements": {
+    "enabled": true
+  },
+  "helmv3": {
+    "enabled": true
+  },
+  "postUpdateOptions": ["helmUpdateSubChartArchives"]
 }
