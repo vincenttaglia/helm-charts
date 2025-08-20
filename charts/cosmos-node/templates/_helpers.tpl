@@ -186,8 +186,8 @@ Generate daemon command with flags
 {{- if .Values.daemon.monitoring.prometheus -}}
 {{- if .Values.daemon.api.enable -}}
 {{- $command = append $command "--api.enable" -}}
-{{- end -}}
 {{- $command = append $command (printf "--api.address=tcp://0.0.0.0:%d" (.Values.chain.ports.api | int)) -}}
+{{- end -}}
 {{- end -}}
 {{- range .Values.daemon.flags -}}
 {{- $command = append $command . -}}
