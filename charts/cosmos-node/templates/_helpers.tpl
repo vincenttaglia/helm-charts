@@ -177,10 +177,16 @@ Generate daemon command with flags
 {{- $command = append $command (printf "--minimum-gas-prices=%s" .Values.chain.minGasPrices) -}}
 {{- $command = append $command (printf "--grpc.address=0.0.0.0:%d" (.Values.chain.ports.grpc | int)) -}}
 {{- $command = append $command (printf "--rpc.laddr=tcp://0.0.0.0:%d" (.Values.chain.ports.rpc | int)) -}}
+{{- if .Values.daemon.logging.enableLogFormat -}}
 {{- $command = append $command (printf "--log_format=%s" .Values.daemon.logFormat) -}}
+{{- end -}}
+{{- if .Values.daemon.logging.enableLogLevel -}}
 {{- $command = append $command (printf "--log_level=%s" .Values.daemon.logLevel) -}}
+{{- end -}}
 {{- if .Values.daemon.monitoring.prometheus -}}
+{{- if .Values.daemon.api.enable -}}
 {{- $command = append $command "--api.enable" -}}
+{{- end -}}
 {{- $command = append $command (printf "--api.address=tcp://0.0.0.0:%d" (.Values.chain.ports.api | int)) -}}
 {{- end -}}
 {{- range .Values.daemon.flags -}}

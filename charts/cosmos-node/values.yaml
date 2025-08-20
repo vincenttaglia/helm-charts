@@ -175,18 +175,28 @@ securityContext:
 daemon:
   # -- Additional command line flags
   flags: []
-  # -- Log level
+  # -- Log level (set to false to disable --log_level flag for binaries that don't support it)
   logLevel: "info"
-  # -- Log format (json/plain)
+  # -- Log format (set to false to disable --log_format flag for binaries that don't support it)
   logFormat: "json"
   # -- Enable unsafe operations
   unsafe: false
+  # -- Logging configuration
+  logging:
+    # -- Enable log level flag (set to false for binaries that don't support --log_level)
+    enableLogLevel: true
+    # -- Enable log format flag (set to false for binaries that don't support --log_format)
+    enableLogFormat: true
   # -- Monitoring configuration
   monitoring:
     # -- Enable Prometheus metrics
     prometheus: true
     # -- Metrics bind address
     address: "0.0.0.0:26660"
+  # -- API configuration
+  api:
+    # -- Enable API server (set to false for binaries that don't support --api.enable flag)
+    enable: true
 
 # -- Persistence configuration
 persistence:
