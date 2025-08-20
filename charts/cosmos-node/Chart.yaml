@@ -2,7 +2,7 @@ apiVersion: v2
 name: cosmos-node
 description: A professional, production-ready Helm chart for deploying Cosmos SDK blockchain nodes with enterprise-grade features
 type: application
-version: 2.5.2
+version: 2.5.3
 appVersion: "v25.1.0"
 maintainers:
   - name: vince
@@ -20,20 +20,6 @@ keywords:
 annotations:
   category: "Blockchain"
   licenses: "Apache-2.0"
-  artifacthub.io/operator: "false"
-  artifacthub.io/prerelease: "false"
-  artifacthub.io/containsSecurityUpdates: "false"
-  artifacthub.io/changes: |
-    - kind: changed
-      description: "Converted from Deployment to StatefulSet with volume claim templates"
-    - kind: added
-      description: "Added comprehensive security features including RBAC, Network Policies, and Pod Security Standards"
-    - kind: added
-      description: "Added enterprise features: HPA, PDB, monitoring, and observability"
-    - kind: improved
-      description: "Enhanced bootstrap process with better error handling and retry logic"
-    - kind: improved
-      description: "Restructured values.yaml with 200+ configuration options and validation"
 home: https://cosmos.network
 sources:
   - https://github.com/cosmos/cosmos-sdk

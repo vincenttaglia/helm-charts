@@ -20,6 +20,9 @@ data:
     DATA_DIR="$CHAIN_HOME/data"
     DAEMON_NAME="${DAEMON_NAME:-gaiad}"
     
+    # Flag file for tracking snapshot download
+    SNAPSHOT_FLAG_FILE="/home/.snapshot_downloaded"
+    
     # Color codes for output
     RED='\033[0;31m'
     GREEN='\033[0;32m'
@@ -154,13 +157,13 @@ data:
             fi
         else
             # Create minimal config.toml with seeds
-            cat > "$config_file" << EOF
-    # Cosmos SDK Node Configuration
-    
-    [p2p]
-    # Seed nodes for initial peer discovery
-    seeds = "$seeds"
-    EOF
+            {
+                echo "# Cosmos SDK Node Configuration"
+                echo ""
+                echo "[p2p]"
+                echo "# Seed nodes for initial peer discovery"
+                echo "seeds = \"$seeds\""
+            } > "$config_file"
             log "Created new config.toml with seeds" "$GREEN"
         fi
         
@@ -179,9 +182,18 @@ data:
             return 0
         fi
         
+        # Check if snapshot was already downloaded using flag file
+        if [ -f "$SNAPSHOT_FLAG_FILE" ]; then
+            log "Snapshot already downloaded (flag file exists: $SNAPSHOT_FLAG_FILE), skipping" "$YELLOW"
+            return 0
+        fi
+        
         # Check if data already exists
         if [ -f "$DATA_DIR/priv_validator_state.json" ]; then
             log "Blockchain data already exists, skipping snapshot" "$YELLOW"
+            # Create flag file to indicate snapshot process was completed (even if skipped)
+            touch "$SNAPSHOT_FLAG_FILE"
+            echo "$(date '+%Y-%m-%d %H:%M:%S') - Snapshot skipped due to existing data" > "$SNAPSHOT_FLAG_FILE"
             return 0
         fi
         
@@ -253,11 +265,14 @@ data:
             
             log "Extracting snapshot (${file_size} bytes)..." "$BLUE"
             
+            local extraction_success=false
+            
             case "$snapshot_file" in
                 *.tar.lz4)
                     log "Extracting LZ4 compressed tar file..." "$BLUE"
                     if lz4 -d "$snapshot_file" --stdout | tar -xf -; then
                         log "Snapshot extracted successfully" "$GREEN"
+                        extraction_success=true
                     else
                         log "Failed to extract lz4 snapshot, continuing without it" "$YELLOW"
                         rm -f "$snapshot_file"
@@ -268,6 +283,7 @@ data:
                     log "Extracting gzipped tar file..." "$BLUE"
                     if tar -xzf "$snapshot_file"; then
                         log "Snapshot extracted successfully" "$GREEN"
+                        extraction_success=true
                     else
                         log "Failed to extract gzipped snapshot, continuing without it" "$YELLOW"
                         rm -f "$snapshot_file"
@@ -278,6 +294,7 @@ data:
                     log "Extracting tar file..." "$BLUE"
                     if tar -xf "$snapshot_file"; then
                         log "Snapshot extracted successfully" "$GREEN"
+                        extraction_success=true
                     else
                         log "Failed to extract tar snapshot, continuing without it" "$YELLOW"
                         rm -f "$snapshot_file"
@@ -290,6 +307,7 @@ data:
                         log "Detected LZ4 file by content, attempting LZ4 extraction..." "$BLUE"
                         if lz4 -d "$snapshot_file" --stdout | tar -xf -; then
                             log "Snapshot extracted successfully" "$GREEN"
+                            extraction_success=true
                         else
                             log "Failed to extract detected LZ4 file, continuing without it" "$YELLOW"
                             rm -f "$snapshot_file"
@@ -299,6 +317,7 @@ data:
                         log "Trying as regular tar file..." "$YELLOW"
                         if tar -xf "$snapshot_file" 2>/dev/null; then
                             log "Snapshot extracted successfully" "$GREEN"
+                            extraction_success=true
                         else
                             log "Failed to extract snapshot, continuing without it" "$YELLOW"
                             rm -f "$snapshot_file"
@@ -307,6 +326,19 @@ data:
                     fi
                     ;;
             esac
+            
+            # Create flag file if extraction was successful
+            if [ "$extraction_success" = "true" ]; then
+                {
+                    echo "Snapshot downloaded and extracted successfully"
+                    echo "Date: $(date '+%Y-%m-%d %H:%M:%S')"
+                    echo "URL: $snapshot_url"
+                    echo "File: $snapshot_file"
+                    echo "Size: $file_size bytes"
+                    echo "Chain Home: $CHAIN_HOME"
+                } > "$SNAPSHOT_FLAG_FILE"
+                log "Created snapshot flag file: $SNAPSHOT_FLAG_FILE" "$GREEN"
+            fi
             
             # Cleanup
             rm -f "$snapshot_file"
@@ -325,7 +357,7 @@ data:
         chown -R 1000:1000 "$CHAIN_HOME"
         
         log "Chain directory structure ready" "$GREEN"
-        }
+    }
     
     configure_state_sync() {
         if [ "${STATE_SYNC_ENABLED:-false}" != "true" ]; then
@@ -406,6 +438,15 @@ data:
         
         if is_initialized; then
             log "Node already initialized, skipping initialization..." "$YELLOW"
+            
+            # Check and display snapshot flag status
+            if [ -f "$SNAPSHOT_FLAG_FILE" ]; then
+                log "Snapshot flag file found. Contents:" "$BLUE"
+                cat "$SNAPSHOT_FLAG_FILE" | while IFS= read -r line; do
+                    log "  $line" "$BLUE"
+                done
+            fi
+            
             log "Setting final ownership..." "$BLUE"
             chown -R 1000:1000 "$CHAIN_HOME"
             
