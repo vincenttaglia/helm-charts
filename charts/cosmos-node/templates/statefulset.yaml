@@ -203,6 +203,8 @@ spec:
       {{- end }}
   {{- if .Values.persistence.enabled }}
   volumeClaimTemplates:
+    - apiVersion: v1                                                                                                                                                                                                                                                                                              │ │
+      kind: PersistentVolumeClaim 
     - metadata:
         name: data
         labels:
