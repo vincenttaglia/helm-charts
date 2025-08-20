@@ -5,7 +5,7 @@ This repository contains Helm charts for Nodeify's tools and services.
 ## Available Charts
 
 - indexer-tools - Tools for blockchain indexing
-- cosmoshub-rpc - Blockchain node
+- cosmoshub-node - Blockchain node
 
 ## Usage
 
