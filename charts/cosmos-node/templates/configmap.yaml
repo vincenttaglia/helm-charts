@@ -21,7 +21,7 @@ data:
     DAEMON_NAME="${DAEMON_NAME:-gaiad}"
     
     # Flag file for tracking snapshot download
-    SNAPSHOT_FLAG_FILE="/home/.snapshot_downloaded"
+    SNAPSHOT_FLAG_FILE="$CHAIN_HOME/.snapshot_downloaded"
     
     # Color codes for output
     RED='\033[0;31m'
