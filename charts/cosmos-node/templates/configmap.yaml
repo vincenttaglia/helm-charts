@@ -197,9 +197,6 @@ data:
             return 0
         fi
         
-        log "Installing required packages..." "$BLUE"
-        apk add --no-cache curl jq tar lz4
-        
         # Parse snapshot source
         local source_type="${SNAPSHOT_SOURCE%%:*}"
         local source_value="${SNAPSHOT_SOURCE#*:}"
@@ -455,6 +452,10 @@ data:
         fi
         
         log "Node needs initialization, proceeding..." "$BLUE"
+        
+        # Install required packages only when initializing
+        log "Installing required packages..." "$BLUE"
+        apk add --no-cache wget curl jq tar lz4
         
         if [ "${STATE_SYNC_ENABLED:-false}" = "true" ] && [ "${SNAPSHOT_ENABLED:-false}" = "true" ]; then
             log "ERROR: Cannot enable both snapshot and state sync - choose one" "$RED"
