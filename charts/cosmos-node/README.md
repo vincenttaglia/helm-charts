@@ -61,54 +61,27 @@ chain:
 
 image:
   repository: "ghcr.io/cosmos/gaia"
-  tag: "v18.1.0"
-
-network:
-  type: "mainnet"
+  tag: "v25.1.0"
 
 resources:
   requests:
-    cpu: 4
-    memory: 16Gi
+    cpu: 2
+    memory: 4Gi
   limits:
     memory: 48Gi
 
 persistence:
   size: 500Gi
-```
-
-#### Osmosis (Mainnet)
-```yaml
-chain:
-  name: "osmosis"
-  chainId: "osmosis-1"
-  daemon: "osmosisd"
-  home: ".osmosisd"
-  minGasPrices: "0.0025uosmo"
-  denom: "uosmo"
-
-image:
-  repository: "osmolabs/osmosis"
-  tag: "v25.0.0"
-
-network:
-  type: "mainnet"
-
-resources:
-  requests:
-    cpu: 8
-    memory: 32Gi
-  limits:
-    memory: 64Gi
-
-persistence:
-  size: 2Ti
 
 daemon:
   flags:
     - "--halt-height=0"
     - "--halt-time=0"
     - "--min-retain-blocks=0"
+
+snapshot:
+  enabled: true
+  command: "curl -s https://polkachu.com/api/v2/chain_snapshots/cosmos/mainnet | jq -r .snapshot.url"
 ```
 
 ## ⚙️ Configuration
