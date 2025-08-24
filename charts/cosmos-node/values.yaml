@@ -354,13 +354,7 @@ podAnnotations: {}
 podLabels: {}
 
 # -- Deployment strategy
-strategy:
-  # -- Strategy type (RollingUpdate/OnDelete for StatefulSet)
-  type: RollingUpdate
-  # -- Rolling update configuration
-  rollingUpdate:
-    # -- Partition for rolling update
-    partition: 0
+strategy: {}
 
 # -- Priority class name
 priorityClassName: ""
