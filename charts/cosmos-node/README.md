@@ -59,6 +59,11 @@ chain:
   minGasPrices: "0.001uatom"
   denom: "uatom"
 
+bootstrap:
+  snapshot:
+    enabled: true
+    command: "curl -s https://polkachu.com/api/v2/chain_snapshots/cosmos/mainnet | jq -r .snapshot.url"
+
 image:
   repository: "ghcr.io/cosmos/gaia"
   tag: "v25.1.0"
@@ -78,10 +83,6 @@ daemon:
     - "--halt-height=0"
     - "--halt-time=0"
     - "--min-retain-blocks=0"
-
-snapshot:
-  enabled: true
-  command: "curl -s https://polkachu.com/api/v2/chain_snapshots/cosmos/mainnet | jq -r .snapshot.url"
 ```
 
 ## ⚙️ Configuration
