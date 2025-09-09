@@ -33,7 +33,7 @@ substreams_sink_noop:
     module: ""
   
   # Additional arguments to pass to the container
-  extraArgs: []
+  extraArgs: []uld 
   
   # Environment variables to set in the container
   # env:
