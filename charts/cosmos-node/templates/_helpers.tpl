@@ -41,7 +41,6 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 app.kubernetes.io/component: node
-app.kubernetes.io/part-of: {{ .Values.chain.chainId }}
 {{- with .Values.commonLabels }}
 {{ toYaml . }}
 {{- end }}
@@ -54,6 +53,7 @@ Selector labels
 app.kubernetes.io/name: {{ include "cosmos-node.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 chain.cosmos.network/name: {{ .Values.chain.name }}
+chain.cosmos.chainId/name: {{ .Values.chain.chainId }}
 {{- end }}
 
 {{/*
