@@ -53,7 +53,7 @@ Selector labels
 app.kubernetes.io/name: {{ include "cosmos-node.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 chain.cosmos.network/name: {{ .Values.chain.name }}
-chain.cosmos.chainId/name: {{ .Values.chain.chainId }}
+chain.cosmos.chainid/name: {{ .Values.chain.chainId }}
 {{- end }}
 
 {{/*
