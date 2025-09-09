@@ -1,0 +1,134 @@
+# Default values for substreams-sink-noop.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Image configuration
+image:
+  repository: streamingfast/substreams-sink-noop
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# Image pull secrets
+imagePullSecrets: []
+
+# Chart name overrides
+nameOverride: ""
+fullnameOverride: ""
+
+# Substreams sink noop specific configuration
+substreams_sink_noop:
+  # Number of replicas
+  replicaCount: 1
+  
+  # Configuration for the substreams sink
+  config:
+    # Substreams endpoint URL (e.g. mainnet.eth.streamingfast.io:443)
+    endpoint: ""
+    # Substreams package manifest - either URL for public packages or local path for mounted secrets
+    # Public URL: https://github.com/streamingfast/substreams-eth-block-meta/releases/download/v0.4.1/substreams-eth-block-meta-v0.4.1.spkg
+    # Mounted secret: /mnt/spkg/package.spkg
+    manifest: ""
+    # Substreams module name to execute (e.g. graph_out)
+    module: ""
+  
+  # Additional arguments to pass to the container
+  extraArgs: []
+  
+  # Environment variables to set in the container
+  # env:
+  #   - name: LOG_LEVEL
+  #     value: "debug"
+  #   - name: API_KEY
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: my-secret
+  #         key: api-key
+  env: []
+  
+  # Service configuration
+  service:
+    type: ClusterIP
+    ports:
+      grpc: 9000
+      metrics: 9090
+  
+  # Pod annotations
+  podAnnotations: {}
+  
+  # Image pull secrets (if different from global)
+  imagePullSecrets: []
+  
+  # Pod security context
+  podSecurityContext: {}
+  
+  # Termination grace period in seconds
+  terminationGracePeriodSeconds: 60
+  
+  # Volume claim specification for state storage
+  volumeClaimSpec:
+    enabled: false
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: 1Gi
+  
+  # Additional volumes to mount (for private .spkg files via secrets)
+  # Example for mounting a secret containing .spkg files:
+  # volumes:
+  #   - name: private-spkg
+  #     secret:
+  #       secretName: my-private-spkg
+  volumes: []
+  
+  # Additional volume mounts for the container
+  # Example for mounting .spkg files from secrets:
+  # volumeMounts:
+  #   - name: private-spkg
+  #     mountPath: /mnt/spkg
+  #     readOnly: true
+  volumeMounts: []
+  
+  # Resource configuration - leave empty by default
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 500m
+    #   memory: 512Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+# Service account configuration
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# ServiceMonitor configuration for Prometheus monitoring
+serviceMonitor:
+  enabled: false
+  path: /metrics
+  interval: 30s
+  scrapeTimeout: 10s
+  labels: {}
+  annotations: {}
+
+# Node selector
+nodeSelector: {}
+
+# Tolerations
+tolerations: []
+
+# Affinity
+affinity: {}
