@@ -20,8 +20,6 @@ s3CredentialsSecret: []
 
 
 commonConfig: 
-  common-auth-plugin: ""
-  common-metering-plugin: ""
   common-live-blocks-addr: ""
   common-merged-blocks-store-url: ""
   common-one-block-store-url: ""
