@@ -1,0 +1,223 @@
+# Default values for substreams-tier-2.
+# This is a YAML-formatted file.
+
+# Override the name of the chart
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # -- Repository for the substreams image
+  repository: ghcr.io/streamingfast/firehose-ethereum
+  # -- Image pull policy (e.g., Always, IfNotPresent, Never)
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag (default: Chart.appVersion)
+  tag: ""
+
+serviceAccount:
+  # -- Specifies whether a service account should be created
+  create: false
+  # -- Annotations to add to the service account
+  annotations: {}
+  # -- The name of the service account to use.
+  #    If not set and `create` is true, a name is generated using the fullname template.
+  name: ""
+
+substreams_tier_2:
+
+  # -- Number of pod replicas for substreams tier 2
+  replicaCount: 1
+
+  config: |
+    # -- Sets the verbosity level of the logging. 0 means least verbose.
+    log-verbosity: 0
+    
+    # -- Determines if logs should be written to a file. If false, logs will be written to stdout.
+    log-to-file: false
+
+    # -- Percentage of memory limit that should trigger auto memory management.
+    common-auto-mem-limit-percent: 90
+    
+    # -- Address for the Substreams Tier 2 gRPC listener.
+    substreams-tier2-grpc-listen-addr: :9000
+
+    # -- Endpoint for Substreams Tier 2 subrequests.
+    substreams-tier2-max-concurrent-requests: 50
+
+  # -- Specify additional command-line arguments to pass to the `tier-2` component.
+  # These arguments can be used to override default settings or provide additional
+  # configurations that are not covered by the standard configuration options.  
+  extraArgs: {}
+
+  # -- Define custom aliases for preconfigured commands in your environment.
+  # This allows you to create shorthand commands for frequently used operations,
+  env:
+    # -- Enable environment variable injection into the container
+    enabled: false
+    variables: {}
+    # -- List of environment variables to set in the container
+    # Each variable must have a `name`, and either a `value` or a `valueFrom`.
+    # Example for literal value:
+    # - name: MY_ENV_VAR
+    #   value: "some-value"
+    # Example for secret reference:
+    # - name: MY_SECRET_VAR
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name: my-secret
+    #       key: secret-key-name
+
+  # -- Resource limits and requests for the container (required for HPA to function)
+  resources: {}
+    # Example to set only limits:
+    # limits:
+    #   cpu: 1000m          # Maximum CPU cores the container can use
+    #   memory: 2Gi         # Maximum memory the container can use
+
+    # Example to set both limits and requests:
+    # limits:
+    #   cpu: 1000m
+    #   memory: 2Gi
+    # requests:
+    #   cpu: 500m           # CPU cores to reserve (used for HPA calculations)
+    #   memory: 1Gi         # Memory to reserve (used for HPA calculations)
+
+  # -- Horizontal Pod Autoscaler configuration
+  autoscaling:
+    # -- Enable autoscaling for the deployment
+    enabled: false
+    # -- Minimum number of replicas
+    minReplicas: 1
+    # -- Maximum number of replicas
+    maxReplicas: 10
+    # -- Target CPU utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # -- Target memory utilization percentage
+    targetMemoryUtilizationPercentage: 80
+
+
+    # -- Optional behavior configuration for fine-tuning scaling operations
+    behavior:
+      # -- Configuration for scaling up pods
+      scaleUp:
+        # -- Number of seconds to wait before scaling up after a previous scale up
+        stabilizationWindowSeconds: 5
+        # -- Policies that control how many pods to add during scaling operations
+        policies:
+        # -- Policy to add exactly one pod at a time
+        - type: Pods
+          # -- Number of pods to add in a single scaling operation
+          value: 1
+          # -- How frequently (in seconds) this policy can be applied
+          periodSeconds: 15
+
+      # -- Configuration for scaling down pods
+      scaleDown:
+        # -- Number of seconds to wait with under-utilization before scaling down
+        stabilizationWindowSeconds: 300
+        # -- Policies that control how many pods to remove during scaling operations
+        policies:
+        # -- Policy to remove exactly one pod at a time
+        - type: Pods
+          # -- Number of pods to remove in a single scaling operation
+          value: 1
+          # -- How frequently (in seconds) this policy can be applied
+          periodSeconds: 60
+
+  service:
+    # -- Specifies the type of the Kubernetes service.
+    # Valid options are "ClusterIP", "NodePort", "LoadBalancer", and "ExternalName".
+    type: ClusterIP
+
+    # -- Specifies the IP family policy for the service.
+    # Valid options are "SingleStack", "PreferDualStack", and "RequireDualStack".
+    ipFamilyPolicy: {}
+
+    # -- Set the IP families to use (e.g., ["IPv4", "IPv6"])
+    ipFamilies:
+      - "IPv4"
+
+    ports:
+      # -- Specifies the port for the Substreams GRPC interface.
+      # This port will be exposed by the service.
+      grpc: 9000
+      
+      # -- Specifies the port for the metrics interface.
+      # This port will be exposed by the service.
+      metrics: 9102
+
+
+  serviceMonitor:
+    # -- Enable or disable the service monitor
+    enabled: false
+
+    # -- Interval at which Prometheus scrapes metrics
+    interval: 30s 
+
+    # -- Timeout for the scrape request
+    scrapeTimeout: 10s 
+    
+    # -- Additional annotations for the ServiceMonitor resource
+    annotations: {}
+      # prometheus.io/scrape: "true"
+      # prometheus.io/port: "9102"
+    
+    # -- Additional labels for the ServiceMonitor resource
+    labels: {}
+      # release: prometheus
+      
+    # -- Configure metrics path
+    path: /metrics
+    
+    # -- Honor labels from scraped metrics
+    honorLabels: false
+    
+    # -- Relabeling configurations for the ServiceMonitor
+    relabelings: []
+      # - action: replace
+      #   sourceLabels: [__meta_kubernetes_pod_label_app]
+      #   targetLabel: app
+
+  # Ingress configuration
+  ingress:
+    # -- Enable or disable ingress
+    enabled: false
+
+    # -- Hostname for the ingress
+    host: "example.domain.com"  # Replace with your actual domain
+
+    # -- Ingress class configuration (K8s 1.19+)
+    ingressClassName: "nginx"  # Set to your preferred ingress controller
+
+    paths:
+      # -- Default path mapping for ingress
+      default: "/"
+      # -- Add additional path mappings if needed
+      # api: "/api"
+
+    # TLS configuration
+    tls:
+      # -- Enable TLS (HTTPS) for ingress
+      enabled: false  # Set to true to enable HTTPS
+      # -- Name of the TLS secret (leave empty for auto-generation)
+      secretName: ""  
+
+    # Additional ingress annotations
+    annotations: {}
+      # -- Add custom annotations for ingress, e.g.:
+      # nginx.ingress.kubernetes.io/rewrite-target: "/"
+      # cert-manager.io/cluster-issuer: "letsencrypt-prod"
+
+
+  # -- Pod-wide security context settings
+  podSecurityContext:
+    # -- Run the pod as a non-root user (recommended for security)
+    runAsNonRoot: false
+    # -- (Optional) User ID to run the container
+    # runAsUser: 101337
+    # -- (Optional) Group ID for the container process
+    # runAsGroup: 101337
+    # -- (Optional) Filesystem group for container
+    # fsGroup: 101337
+
+  # -- Grace period for pod termination (in seconds)
+  terminationGracePeriodSeconds: 60

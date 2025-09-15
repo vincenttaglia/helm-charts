@@ -1,0 +1,74 @@
+{{- $values := $.Values.substreams_tier_2 }}
+{{- if $values.autoscaling.enabled }}
+{{- $componentName := "substreams-tier-2" }}
+{{- $componentLabel := include "substreams_tier_2.componentLabelFor" $componentName }}
+
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}-hpa
+  labels:
+    {{- include "substreams_tier_2.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}
+  minReplicas: {{ $values.autoscaling.minReplicas }}
+  maxReplicas: {{ $values.autoscaling.maxReplicas }}
+  metrics:
+    {{- if $values.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: {{ $values.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if $values.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: {{ $values.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+  {{- if $values.autoscaling.behavior }}
+  behavior:
+    {{- if $values.autoscaling.behavior.scaleDown }}
+    scaleDown:
+      {{- if $values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds }}
+      stabilizationWindowSeconds: {{ $values.autoscaling.behavior.scaleDown.stabilizationWindowSeconds }}
+      {{- end }}
+      {{- if $values.autoscaling.behavior.scaleDown.policies }}
+      policies:
+        {{- range $policy := $values.autoscaling.behavior.scaleDown.policies }}
+        - type: {{ $policy.type }}
+          value: {{ $policy.value }}
+          periodSeconds: {{ $policy.periodSeconds }}
+        {{- end }}
+      {{- end }}
+      {{- if $values.autoscaling.behavior.scaleDown.selectPolicy }}
+      selectPolicy: {{ $values.autoscaling.behavior.scaleDown.selectPolicy }}
+      {{- end }}
+    {{- end }}
+    {{- if $values.autoscaling.behavior.scaleUp }}
+    scaleUp:
+      {{- if $values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds }}
+      stabilizationWindowSeconds: {{ $values.autoscaling.behavior.scaleUp.stabilizationWindowSeconds }}
+      {{- end }}
+      {{- if $values.autoscaling.behavior.scaleUp.policies }}
+      policies:
+        {{- range $policy := $values.autoscaling.behavior.scaleUp.policies }}
+        - type: {{ $policy.type }}
+          value: {{ $policy.value }}
+          periodSeconds: {{ $policy.periodSeconds }}
+        {{- end }}
+      {{- end }}
+      {{- if $values.autoscaling.behavior.scaleUp.selectPolicy }}
+      selectPolicy: {{ $values.autoscaling.behavior.scaleUp.selectPolicy }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,11 @@
+apiVersion: v2
+name: substreams-tier-2
+description: A Helm chart for deploying substreams-tier-2
+type: application
+version: 1.0.0
+appVersion: v2.12.4
+keywords:
+  - substreams-tier-2
+  - firehose-ethereum
+annotations:
+  lookupName: "ghcr.io/streamingfast/firehose-ethereum"

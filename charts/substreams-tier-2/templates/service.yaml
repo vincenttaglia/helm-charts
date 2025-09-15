@@ -1,0 +1,25 @@
+{{- $values := $.Values.substreams_tier_2 }}
+{{- $componentName := "substreams-tier-2" }}
+{{- $componentLabel := include "substreams_tier_2.componentLabelFor" $componentName }}
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}-svc
+  labels:
+    {{- include "substreams_tier_2.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  type: {{ $values.service.type | default "ClusterIP" }}
+  selector:
+    {{- include "substreams_tier_2.selectorLabels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+  ports:
+    - name: grpc
+      port: {{ index $values.service.ports "grpc" }}
+      targetPort: grpc
+      protocol: TCP
+    - name: metrics
+      port: {{ index $values.service.ports "metrics" }}
+      targetPort: metrics
+      protocol: TCP

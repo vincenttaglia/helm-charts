@@ -1,0 +1,39 @@
+{{- if $.Values.substreams_tier_2.ingress.enabled }}
+{{- $values := $.Values.substreams_tier_2 }}
+{{- $componentName := "substreams-tier-2" }}
+{{- $componentLabel := include "substreams_tier_2.componentLabelFor" $componentName }}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}-ingress
+  labels:
+    {{- include "substreams_tier_2.labels" . | nindent 4 }}
+  annotations:
+    {{- toYaml .Values.substreams_tier_2.ingress.annotations | nindent 4 }}
+spec:
+  ingressClassName: {{ $values.ingress.ingressClassName | default "nginx" }}
+  rules:
+    - host: {{ $values.ingress.host }}
+      http:
+        paths:
+          {{- range $pathName, $path := $values.ingress.paths }}
+          - path: {{ $path }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "substreams_tier_2.fullname" $ }}-{{ $componentName }}-svc
+                port:
+                  number: {{ index $values.service.ports "grpc" }}
+          {{- end }}
+  {{- if $values.ingress.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $values.ingress.host }}
+      {{- if $values.ingress.tls.secretName }}
+      secretName: {{ $values.ingress.tls.secretName }}
+      {{- else }}
+      secretName: {{ include "substreams_tier_2.fullname" $ }}-tls
+      {{- end }}
+  {{- end }}
+{{- end }}

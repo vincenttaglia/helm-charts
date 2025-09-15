@@ -1,0 +1,90 @@
+{{- $values := $.Values.substreams_tier_2 }}
+{{- $componentName := "substreams-tier-2" }}
+{{- $componentLabel := include "substreams_tier_2.componentLabelFor" $componentName }}
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}
+  labels:
+    {{- include "substreams_tier_2.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  replicas: {{ $values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "substreams_tier_2.selectorLabels" . | nindent 6 }}
+      {{- $componentLabel | nindent 6 }}
+  template:
+    metadata:
+      {{- with $values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "substreams_tier_2.selectorLabels" . | nindent 8 }}
+        {{- $componentLabel | nindent 8 }}
+    spec:
+      {{- with $values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "substreams_tier_2.serviceAccountName" . }}
+      {{- with $values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      terminationGracePeriodSeconds: {{ $values.terminationGracePeriodSeconds | default "60" }}
+      containers:
+        - name: substreams-tier-2
+          image: {{ $.Values.image.repository }}:{{ $.Values.image.tag | default .Chart.AppVersion }}
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          args:
+            - start
+            - "-c"
+            - "/config/config.yaml"
+            {{- range $arg := $values.extraArgs }}
+            - {{ $arg }}
+            {{- end }}
+          ports:
+            - name: grpc
+              containerPort: {{ index $values.service.ports "grpc" }}
+              protocol: TCP
+            - name: metrics
+              containerPort: {{ index $values.service.ports "metrics" }}
+              protocol: TCP
+          {{- if hasKey $values "resources" }}
+          resources:
+            {{- if hasKey $values.resources "requests" }}
+            requests:
+              {{- toYaml $values.resources.requests | nindent 14 }}
+            {{- end }}
+            {{- if hasKey $values.resources "limits" }}
+            limits:
+              {{- toYaml $values.resources.limits | nindent 14 }}
+            {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+{{- if and (hasKey $values "env") $values.env.enabled }}
+          env:
+            {{- range $values.env.variables }}
+            - name: {{ .name }}
+              {{- if .valueFrom }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .valueFrom.secretKeyRef.name }}
+                  key: {{ .valueFrom.secretKeyRef.key }}
+              {{- else }}
+              value: "{{ .value }}"
+              {{- end }}
+            {{- end }}
+{{- end }}
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "substreams_tier_2.fullname" . }}-{{ $componentName }}-config
+            items:
+              - key: config.yaml
+                path: config.yaml
