@@ -51,6 +51,9 @@ spec:
                   key: AWS_SECRET_ACCESS_KEY
             - name: DSTORE_S3_BUFFERED_READ
               value: "true"
+            {{- if $values.components.rpcPoller.extraEnvs }}
+            {{- toYaml $values.components.rpcPoller.extraEnvs | nindent 12 }}
+            {{- end }}
           ports:
             - name: reader-grpc
               containerPort: 10010

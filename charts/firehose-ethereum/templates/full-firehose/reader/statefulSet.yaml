@@ -37,8 +37,9 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["start", "-c", "/config/config.yaml"]
-          {{- if .Values.s3CredentialsSecret }}
+          {{- if or .Values.s3CredentialsSecret $values.components.reader.extraEnvs }}
           env:
+            {{- if .Values.s3CredentialsSecret }}
             - name: AWS_ACCESS_KEY_ID
               valueFrom:
                 secretKeyRef:
@@ -49,6 +50,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.s3CredentialsSecret }}
                   key: AWS_SECRET_ACCESS_KEY
+            - name: DSTORE_S3_BUFFERED_READ
+              value: "true"
+            {{- end }}
+            {{- if $values.components.reader.extraEnvs }}
+            {{- toYaml $values.components.reader.extraEnvs | nindent 12 }}
+            {{- end }}
           {{- end }}
           ports:
             - name: grpc

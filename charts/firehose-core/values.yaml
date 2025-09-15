@@ -99,6 +99,11 @@ fullMode:
         annotations: []
         # cert-manager.io/cluster-issuer: letsencrypt-production
 
+      # -- Extra environment variables for grpc component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
+
       config:
         # -- gRPC server arguments
         advertise-chain-name: mainnet
@@ -110,6 +115,11 @@ fullMode:
       enabled: true
       # -- Number of replicas for the reader node
       replicas: 1
+
+      # -- Extra environment variables for reader component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
 
       config:
         # -- Execution binary path
@@ -125,6 +135,11 @@ fullMode:
       # -- Number of replicas for the merger node
       replicas: 1
 
+      # -- Extra environment variables for merger component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
+
       config: 
         # -- Merger node arguments
         merger-time-between-store-lookups: 10s
@@ -136,6 +151,11 @@ fullMode:
       # -- Number of replicas for the relayer node
       replicas: 1
 
+      # -- Extra environment variables for relayer component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
+
       config:
         # -- Relayer node arguments
         relayer-max-source-latency: 1h
@@ -145,6 +165,11 @@ fullMode:
       enabled: true
       # -- Number of replicas for the relayer node
       replicas: 1
+
+      # -- Extra environment variables for indexer component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
 
       config:
         # -- Indexer arguments
@@ -175,10 +200,20 @@ chunkMode:
     rpcPoller:
       # -- RPC endpoint to poll for blocks
       endpoint: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+      
+      # -- Extra environment variables for rpcPoller component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
 
     remoteFirehose:
       # -- Firehose endpoint to fetch processed block data
       endpoint: "https://firehose.example.com/ethereum"
+      
+      # -- Extra environment variables for remoteFirehose component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
 
     reader:
       # -- Enable the Firehose reader node
