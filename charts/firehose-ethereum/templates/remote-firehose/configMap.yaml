@@ -1,0 +1,70 @@
+{{- $values := $.Values.chunkMode }}
+{{- if and (eq $.Values.mode "chunk") (eq $.Values.chunkMode.method "firehose") }}
+{{- $ctx := . }}
+{{- $start := int $values.chunkConfig.startBlock }}
+{{- $stop := int $values.chunkConfig.stopBlock }}
+{{- $workers := int $values.chunkConfig.workers }}
+{{- $overlap := 100 }}
+{{- $totalBlocks := sub $stop $start }}
+{{- $totalOverlap := mul (sub $workers 1) $overlap }}
+{{- $effectiveTotal := add $totalBlocks $totalOverlap }}
+{{- $baseChunkSize := div $effectiveTotal $workers }}
+{{- $remainder := mod $effectiveTotal $workers }}
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $ctx.Release.Name }}-remote-firehose-config
+  labels:
+    app: firehose
+data:
+{{- $currentStart := $start }}
+{{- range $i := until $workers }}
+  chunk-{{ $i }}.yaml: |
+    start:
+      args:
+        - merger
+        - reader-node-firehose
+      flags:
+        {{- /* Calculate chunk size with remainder distribution */}}
+        {{- $chunkSize := $baseChunkSize }}
+        {{- if lt $i $remainder }}
+          {{- $chunkSize = add $chunkSize 1 }}
+        {{- end }}
+        
+        {{- /* Calculate stop block */}}
+        {{- $currentStop := add $currentStart $chunkSize }}
+
+        {{- /* Round stop to nearest 100 (except for last chunk) */}}
+        {{- if ne $i (sub $workers 1) }}
+          {{- /* Round to nearest 100: add 50, divide by 100, multiply by 100 */}}
+          {{- $rounded := div (add $currentStop 50) 100 }}
+          {{- $currentStop = mul $rounded 100 }}
+        {{- else }}
+          {{- /* Last chunk must end exactly at stop */}}
+          {{- $currentStop = $stop }}
+        {{- end }}
+        
+        {{- /* Ensure start is rounded to nearest 100 (except first chunk) */}}
+        {{- $displayStart := $currentStart }}
+        {{- if and (ne $i 0) (ne (mod $currentStart 100) 0) }}
+          {{- $displayStart = mul (div (add $currentStart 50) 100) 100 }}
+        {{- end }}
+        reader-node-start-block-num: {{ $displayStart }}
+        reader-node-stop-block-num: {{ $currentStop }}
+        common-first-streamable-block: {{ $displayStart }}
+        reader-node-firehose-endpoint: {{ $values.components.remoteFirehose.endpoint }}
+        {{- range $key, $val := $.Values.commonConfig }}
+        {{ $key }}: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := $.Values.chunkMode.components.reader.config }}
+        {{ $key }}: {{ $val }}
+        {{- end }}
+        {{- range $key, $val := $.Values.chunkMode.components.merger.config }}
+        {{ $key }}: {{ $val }}
+        {{- end }}
+        
+        {{- /* Update start for next chunk - exactly 100 before current stop */}}
+        {{- $currentStart = sub $currentStop $overlap }}
+{{- end }}
+{{- end }}

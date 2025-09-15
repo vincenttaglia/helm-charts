@@ -1,0 +1,24 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "merger" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.merger.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}-config
+  labels:
+    app.kubernetes.io/name: firehose
+    app.kubernetes.io/instance: {{ .Release.Name }}
+data:
+  config.yaml: |
+    start:
+      args:
+        - merger
+      flags:
+{{- range $key, $val := $.Values.commonConfig }}
+        {{ $key }}: {{ $val | quote }}
+{{- end }}
+{{- range $key, $val := $values.components.merger.config }}
+        {{ $key }}: {{ $val | quote }}
+{{- end }}
+{{- end }}

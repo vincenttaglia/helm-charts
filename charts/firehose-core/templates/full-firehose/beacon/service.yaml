@@ -1,0 +1,26 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "beacon" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.lighthouse.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}-svc
+  labels:
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "firehose-ethereum.selectorLabels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+  ports:
+    - name: http-lighthouse
+      port: 5052
+      targetPort: http-lighthouse
+      protocol: TCP
+    - name: http-metrics
+      port: 5054
+      targetPort: http-metrics
+      protocol: TCP
+{{- end }}

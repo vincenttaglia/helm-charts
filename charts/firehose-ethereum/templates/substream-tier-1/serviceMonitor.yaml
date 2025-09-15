@@ -1,0 +1,26 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "substreams-tier-1" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.substreams.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-{{ $componentName }}-monitor
+  labels:
+    release: prometheus  # Adjust if your Prometheus release uses a different label
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "firehose-ethereum.selectorLabels" . | nindent 6 }}
+      {{- $componentLabel | nindent 6 }}
+  namespaceSelector:
+    matchNames:
+      - {{ .Release.Namespace }}
+  endpoints:
+    - port: metrics
+      interval: 15s
+      scrapeTimeout: 10s
+      path: /metrics
+{{- end }}

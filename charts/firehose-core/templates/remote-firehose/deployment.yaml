@@ -1,0 +1,81 @@
+{{- $values := $.Values.chunkMode }}
+{{- if and (eq $.Values.mode "chunk") (eq $.Values.chunkMode.method "firehose") }}
+{{- $workers := int $values.chunkConfig.workers }}
+{{- $ctx := . -}}
+{{- range $i := until $workers }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: firehose-chunk-{{ $i }}
+  labels:
+    app: firehose-chunk
+    chunk: "{{ $i }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: firehose-chunk
+      chunk: "{{ $i }}"
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: {{ $values.storage.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ $values.storage.readerNode.size | quote }}
+  template:
+    metadata:
+      labels:
+        app: firehose-chunk
+        chunk: "{{ $i }}"
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: firehose
+          image: {{ $.Values.image.repository }}:{{ default $.Chart.AppVersion $.Values.image.tag }}
+          imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
+          args: ["start", "-c", "/config/chunk-{{ $i }}.yaml"]
+          {{- if $ctx.Values.s3CredentialsSecret }}
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ctx.Values.s3CredentialsSecret }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $ctx.Values.s3CredentialsSecret }}
+                  key: AWS_SECRET_ACCESS_KEY
+            - name: DSTORE_S3_BUFFERED_READ
+              value: "true"
+          {{- end }}
+          ports:
+            - name: reader-grpc
+              containerPort: 10010
+              protocol: TCP
+            - name: merger-grpc
+              containerPort: 10012
+              protocol: TCP
+          livenessProbe:
+            tcpSocket:
+              port: reader-grpc
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+              readOnly: true
+            - name: storage
+              mountPath: /app/firehose-data
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ $ctx.Release.Name }}-remote-firehose-config
+---
+{{- end }}
+{{- end }}

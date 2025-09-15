@@ -1,0 +1,35 @@
+{{- $values := $.Values.fullMode.components.grpc }}
+{{- $componentName := "grpc" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and $values.enabled (hasKey $values "ingress") (hasKey $values.ingress "host") }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}-ingress
+  labels:
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+  annotations:
+    {{- with $values.ingress.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  {{- with $values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+  {{- end }}
+  rules:
+    - host: {{ $values.ingress.host }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Release.Name }}-firehose-{{ $componentName }}-svc
+                port:
+                  name: grpc
+  tls:
+    - hosts:
+        - {{ $values.ingress.host }}
+      secretName: {{ printf "%s-firehose-%s-tls" .Release.Name $componentName }}
+{{- end }}

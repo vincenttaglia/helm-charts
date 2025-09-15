@@ -1,0 +1,81 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "reader" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.reader.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}
+  labels:
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "firehose-ethereum.selectorLabels" . | nindent 6 }}
+      {{- $componentLabel | nindent 6 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: {{ $.Values.fullMode.storage.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ $.Values.fullMode.storage.readerNode.size | quote }}
+  replicas: {{ $values.components.reader.replicas }}
+  template:
+    metadata:
+      labels:
+        {{- include "firehose-ethereum.selectorLabels" . | nindent 8 }}
+        {{- $componentLabel | nindent 8 }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      containers:
+        - name: {{ $componentName }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: ["start", "-c", "/config/config.yaml"]
+          {{- if .Values.s3CredentialsSecret }}
+          env:
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3CredentialsSecret }}
+                  key: AWS_ACCESS_KEY_ID
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.s3CredentialsSecret }}
+                  key: AWS_SECRET_ACCESS_KEY
+          {{- end }}
+          ports:
+            - name: grpc
+              containerPort: 10010
+              protocol: TCP
+            - name: prom
+              containerPort: 9102
+              protocol: TCP
+            - name: geth-jsonrpc
+              containerPort: 8545
+              protocol: TCP
+            - name: geth-auth
+              containerPort: 8551
+              protocol: TCP
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: storage
+              mountPath: /app/firehose-data
+            - name: jwt-secret
+              mountPath: /jwt
+              readOnly: true
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ .Release.Name }}-firehose-{{ $componentName }}-config
+        - name: jwt-secret
+          secret:
+            secretName: {{ .Release.Name }}-firehose-jwt
+{{- end }}

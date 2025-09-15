@@ -1,0 +1,24 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "reader" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.reader.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}-config
+  labels:
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+data:
+  config.yaml: |
+    start:
+      args:
+        - reader-node
+      flags:
+{{- range $key, $val := $.Values.commonConfig }}
+        {{ $key }}: {{ $val | quote }}
+{{- end }}
+{{- range $key, $val := $values.components.reader.config }}
+        {{ $key }}: {{ $val | quote }}
+{{- end }}
+{{- end }}

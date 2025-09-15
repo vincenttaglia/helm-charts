@@ -1,0 +1,69 @@
+{{- $values := $.Values.fullMode }}
+{{- $componentName := "beacon" }}
+{{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
+{{- if and (eq .Values.mode "full") $values.components.lighthouse.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-firehose-{{ $componentName }}
+  labels:
+    {{- include "firehose-ethereum.labels" . | nindent 4 }}
+    {{- $componentLabel | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "firehose-ethereum.selectorLabels" . | nindent 6 }}
+      {{- $componentLabel | nindent 6 }}
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: {{ $.Values.fullMode.storage.storageClass | quote }}
+        resources:
+          requests:
+            storage: {{ $.Values.fullMode.storage.lighthouse.size | quote }}
+  template:
+    metadata:
+      labels:
+        {{- include "firehose-ethereum.selectorLabels" . | nindent 8 }}
+        {{- $componentLabel | nindent 8 }}
+    spec:
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      containers:
+        - name: {{ $componentName }}
+          image: sigp/lighthouse:latest-amd64
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - lighthouse
+            - beacon_node
+            - --datadir=/data
+            - --http
+            - --http-address=0.0.0.0
+            - --execution-jwt=/jwt/jwt.hex
+            - --network={{ $values.components.lighthouse.network }}
+            - --checkpoint-sync-url={{ $values.components.lighthouse.checkpointSyncUrl }}
+            - --execution-endpoint=http://{{ .Release.Name }}-firehose-reader-svc:8551
+            - --prune-blobs={{ $values.components.lighthouse.pruneBlobs }}
+            - --metrics
+            - --metrics-address=0.0.0.0
+          ports:
+            - name: http-lighthouse
+              containerPort: 5052
+              protocol: TCP
+            - name: http-metrics
+              containerPort: 5054
+              protocol: TCP
+          volumeMounts:
+            - name: storage
+              mountPath: /data
+            - name: jwt-secret
+              mountPath: /jwt
+              readOnly: true
+      volumes:
+        - name: jwt-secret
+          secret:
+            secretName: {{ .Release.Name }}-firehose-jwt
+
+{{- end }}

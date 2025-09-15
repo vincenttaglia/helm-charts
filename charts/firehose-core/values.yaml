@@ -1,0 +1,202 @@
+# Default values for firehose.
+# This is a YAML-formatted file.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  # -- Image for Firehose
+  repository: ghcr.io/streamingfast/firehose-core
+  pullPolicy: IfNotPresent
+  # -- Overrides the image tag
+  # @default -- Chart.appVersion
+  tag: ""
+
+# -- Pull secrets required to fetch the Image
+imagePullSecrets: []
+
+# -- Secret name containing S3/object storage credentials. Must contain keys: access-key, secret-key
+s3CredentialsSecret: []
+
+
+commonConfig: 
+  common-auth-plugin: ""
+  common-metering-plugin: ""
+  common-live-blocks-addr: ""
+  common-merged-blocks-store-url: ""
+  common-one-block-store-url: ""
+  common-forked-blocks-store-url: ""
+  common-auto-mem-limit-percent: 90
+  common-system-shutdown-signal-delay: 10s
+  common-index-block-sizes: 10000
+
+# -- Firehose operating mode
+# Options:
+#   - "full": Complete Firehose stack with all components (reader, merger, relayer, etc.)
+#   - "chunk": Lightweight mode for specific block ranges
+mode: full
+
+fullMode:
+  # -- Storage configuration for full mode
+  storage:
+    lighthouse:
+      size: 400Gi
+    readerNode:
+      size: 4Ti
+    storageClass: ""
+
+  # Component-specific configurations for full mode
+  components:
+
+    lighthouse:
+      # -- Enable Lighthouse for beacon chain synchronization
+      enabled: true
+      
+      # -- Ethereum network (mainnet, goerli, sepolia, holesky)
+      network: mainnet
+      
+      # -- Remove old blob data to save space (recommended for non-archive nodes)
+      pruneBlobs: true
+      
+      # -- Checkpoint sync URL for faster initial sync
+      checkpointSyncUrl: "https://sync-mainnet.beaconcha.in"
+
+    substreams:
+      # -- Enable Substreams Tier 1
+      enabled: false
+      # -- Number of replicas for the Substreams component
+      replicas: 1
+
+      # -- gRPC server configuration
+      ingress:
+        enabled: false
+        host: "substreams.example.com"
+        ingressClassName: "nginx"
+        annotations: []
+        #  cert-manager.io/cluster-issuer: letsencrypt-production
+
+      config:
+        # -- Substreams arguments
+        advertise-chain-name: mainnet
+        substreams-block-execution-timeout: 10m
+        substreams-state-store-default-tag: s3
+        substreams-state-store-url: ""
+        substreams-tier1-quicksave-store: ""
+        substreams-tier1-subrequests-endpoint: ""
+        substreams-tier1-active-requests-hard-limit: 50
+        substreams-tier1-active-requests-soft-limit: 45
+
+       
+    grpc:
+      # -- Enable the Firehose gRPC server
+      enabled: true
+      # -- Number of replicas for the gRPC server
+      replicas: 1
+
+      # -- gRPC server configuration
+      ingress:
+        enabled: false
+        host: "firehose.example.com"
+        ingressClassName: ""  # optional
+        annotations: []
+        # cert-manager.io/cluster-issuer: letsencrypt-production
+
+      config:
+        # -- gRPC server arguments
+        advertise-chain-name: mainnet
+        firehose-rate-limit-bucket-size: 10
+        firehose-rate-limit-bucket-fill-rate: 2s
+
+    reader:
+      # -- Enable the Firehose reader node
+      enabled: true
+      # -- Number of replicas for the reader node
+      replicas: 1
+
+      config:
+        # -- Execution binary path
+        reader-node-path: "/app/geth"
+        reader-node-arguments: "--networkid=1 --ipcpath={data-dir}/reader/ipc --port=30302 --http --http.api=eth,net,web3 --http.port=8545 --http.addr=0.0.0.0 --http.vhosts=* --authrpc.port=8551 --authrpc.addr=0.0.0.0 --authrpc.vhosts=* --authrpc.jwtsecret=/jwt/jwt.hex --cache=8192 --syncmode=full --vmtrace=firehose"
+        reader-node-blocks-chan-capacity: 5000
+        reader-node-readiness-max-latency: 1200s
+        reader-node-firehose-plaintext: true
+    
+    merger:
+      # -- Enable the Firehose merger node
+      enabled: true
+      # -- Number of replicas for the merger node
+      replicas: 1
+
+      config: 
+        # -- Merger node arguments
+        merger-time-between-store-lookups: 10s
+        merger-delete-threads: 100
+
+    relayer:
+      # -- Enable the Firehose relayer node
+      enabled: true
+      # -- Number of replicas for the relayer node
+      replicas: 1
+
+      config:
+        # -- Relayer node arguments
+        relayer-max-source-latency: 1h
+
+    indexer:
+      # -- Enable the Firehose indexer node
+      enabled: true
+      # -- Number of replicas for the relayer node
+      replicas: 1
+
+      config:
+        # -- Indexer arguments
+        log-to-file: false
+
+chunkMode:
+  # -- Mode to use in chunk processing
+  # Options:
+  #   - "firehose": Remote firehose for block data
+  #   - "poller": Remote rpc for block data
+  method: "firehose"
+
+  # -- Storage configuration for chunk mode
+  storage:
+    readerNode:
+      size: 50Mi
+    storageClass: ""
+
+  chunkConfig:
+    # -- Starting block number (inclusive)
+    startBlock: 0
+    # -- Ending block number (exclusive)
+    stopBlock: 100000
+    # -- Number of workers to split block range across
+    workers: 4
+
+  components:
+    rpcPoller:
+      # -- RPC endpoint to poll for blocks
+      endpoint: "https://mainnet.infura.io/v3/YOUR_INFURA_PROJECT_ID"
+
+    remoteFirehose:
+      # -- Firehose endpoint to fetch processed block data
+      endpoint: "https://firehose.example.com/ethereum"
+
+    reader:
+      # -- Enable the Firehose reader node
+      enabled: true
+      # -- Reader node configuration
+      config:
+        reader-node-blocks-chan-capacity: 5000
+        reader-node-readiness-max-latency: 1200s
+        reader-node-firehose-plaintext: true
+    
+    merger:
+      # -- Enable the Firehose merger node
+      enabled: true
+      # -- Merger node configuration
+      config:
+        merger-time-between-store-lookups: 10s
+        merger-delete-threads: 100
+
+    
