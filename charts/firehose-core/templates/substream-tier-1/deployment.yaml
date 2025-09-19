@@ -28,21 +28,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["start", "-c", "/config/config.yaml"]
-          {{- if .Values.s3CredentialsSecret }}
-          env:
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.s3CredentialsSecret }}
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.s3CredentialsSecret }}
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: DSTORE_S3_BUFFERED_READ
-              value: "true" 
-          {{- end }}
+          {{- include "firehose-ethereum.envVars" (dict "context" . "component" $values.components.substreams) | nindent 10 }}
           ports:
             - name: grpc
               containerPort: 10016

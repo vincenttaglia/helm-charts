@@ -72,3 +72,53 @@ Create the name of the service account to use
 {{- define "firehose-ethereum.componentLabelFor" -}}
 app.kubernetes.io/component: {{ . }}
 {{- end }}
+
+{{/*
+Environment variables helper
+Usage: {{ include "firehose-ethereum.envVars" (dict "context" . "component" $componentConfig) }}
+*/}}
+{{- define "firehose-ethereum.envVars" -}}
+{{- $context := .context -}}
+{{- $component := .component -}}
+{{- if or $context.Values.s3CredentialsSecret $component.extraEnvs }}
+env:
+  {{- if $context.Values.s3CredentialsSecret }}
+  - name: AWS_ACCESS_KEY_ID
+    valueFrom:
+      secretKeyRef:
+        name: {{ $context.Values.s3CredentialsSecret }}
+        key: AWS_ACCESS_KEY_ID
+  - name: AWS_SECRET_ACCESS_KEY
+    valueFrom:
+      secretKeyRef:
+        name: {{ $context.Values.s3CredentialsSecret }}
+        key: AWS_SECRET_ACCESS_KEY
+  - name: DSTORE_S3_BUFFERED_READ
+    value: "true"
+  {{- end }}
+  {{- range $component.extraEnvs }}
+  {{- if .valueFrom }}
+  - name: {{ .name }}
+    valueFrom:
+      {{- if .valueFrom.secretKeyRef }}
+      secretKeyRef:
+        name: {{ .valueFrom.secretKeyRef.name }}
+        key: {{ .valueFrom.secretKeyRef.key }}
+        {{- if .valueFrom.secretKeyRef.optional }}
+        optional: {{ .valueFrom.secretKeyRef.optional }}
+        {{- end }}
+      {{- else if .valueFrom.configMapKeyRef }}
+      configMapKeyRef:
+        name: {{ .valueFrom.configMapKeyRef.name }}
+        key: {{ .valueFrom.configMapKeyRef.key }}
+        {{- if .valueFrom.configMapKeyRef.optional }}
+        optional: {{ .valueFrom.configMapKeyRef.optional }}
+        {{- end }}
+      {{- end }}
+  {{- else }}
+  - name: {{ .name }}
+    value: {{ .value | quote }}
+  {{- end }}
+  {{- end }}
+{{- end }}
+{{- end }}

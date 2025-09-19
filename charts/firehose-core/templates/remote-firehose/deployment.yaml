@@ -37,26 +37,7 @@ spec:
           image: {{ $.Values.image.repository }}:{{ default $.Chart.AppVersion $.Values.image.tag }}
           imagePullPolicy: {{ $ctx.Values.image.pullPolicy }}
           args: ["start", "-c", "/config/chunk-{{ $i }}.yaml"]
-          {{- if or $ctx.Values.s3CredentialsSecret $values.components.remoteFirehose.extraEnvs }}
-          env:
-            {{- if $ctx.Values.s3CredentialsSecret }}
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $ctx.Values.s3CredentialsSecret }}
-                  key: AWS_ACCESS_KEY_ID
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $ctx.Values.s3CredentialsSecret }}
-                  key: AWS_SECRET_ACCESS_KEY
-            - name: DSTORE_S3_BUFFERED_READ
-              value: "true"
-            {{- end }}
-            {{- if $values.components.remoteFirehose.extraEnvs }}
-            {{- toYaml $values.components.remoteFirehose.extraEnvs | nindent 12 }}
-            {{- end }}
-          {{- end }}
+          {{- include "firehose-ethereum.envVars" (dict "context" $ctx "component" $values.components.remoteFirehose) | nindent 10 }}
           ports:
             - name: reader-grpc
               containerPort: 10010

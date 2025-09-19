@@ -103,6 +103,16 @@ fullMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
       config:
         # -- gRPC server arguments
@@ -120,6 +130,16 @@ fullMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
       config:
         # -- Execution binary path
@@ -139,6 +159,16 @@ fullMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
       config: 
         # -- Merger node arguments
@@ -155,6 +185,16 @@ fullMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
       config:
         # -- Relayer node arguments
@@ -170,10 +210,61 @@ fullMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
       config:
         # -- Indexer arguments
         log-to-file: false
+
+    substreams:
+      # -- Enable Substreams Tier 1
+      enabled: false
+      # -- Number of replicas for the Substreams component
+      replicas: 1
+
+      # -- gRPC server configuration
+      ingress:
+        enabled: false
+        host: "substreams.example.com"
+        ingressClassName: "nginx"
+        annotations: []
+        #  cert-manager.io/cluster-issuer: letsencrypt-production
+
+      # -- Extra environment variables for substreams component
+      extraEnvs: []
+      # - name: CUSTOM_VAR
+      #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
+
+      config:
+        # -- Substreams arguments
+        advertise-chain-name: mainnet
+        substreams-block-execution-timeout: 10m
+        substreams-state-store-default-tag: s3
+        substreams-rpc-endpoints: ""
+        substreams-state-store-url: ""
+        substreams-tier1-quicksave-store: ""
+        substreams-tier1-subrequests-endpoint: ""
+        substreams-tier1-active-requests-hard-limit: 50
+        substreams-tier1-active-requests-soft-limit: 45
 
 chunkMode:
   # -- Mode to use in chunk processing
@@ -205,6 +296,16 @@ chunkMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
     remoteFirehose:
       # -- Firehose endpoint to fetch processed block data
@@ -214,6 +315,16 @@ chunkMode:
       extraEnvs: []
       # - name: CUSTOM_VAR
       #   value: "custom_value"
+      # - name: SECRET_VAR
+      #   valueFrom:
+      #     secretKeyRef:
+      #       name: my-secret
+      #       key: secret-key
+      # - name: CONFIG_VAR
+      #   valueFrom:
+      #     configMapKeyRef:
+      #       name: my-configmap
+      #       key: config-key
 
     reader:
       # -- Enable the Firehose reader node
