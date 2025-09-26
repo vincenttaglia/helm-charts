@@ -1,7 +1,7 @@
 {{- $values := $.Values.fullMode }}
 {{- $componentName := "op-node" }}
 {{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
-{{- if and (eq .Values.mode "full") $values.components.op-node.enabled }}
+{{- if and (eq .Values.mode "full") $values.components.opnode.enabled }}
 apiVersion: v1
 kind: Service
 metadata:

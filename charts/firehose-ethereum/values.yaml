@@ -245,7 +245,7 @@ fullMode:
         # -- Indexer arguments
         log-to-file: false
     
-    op-node:
+    opnode:
       enabled: false
 
       image:

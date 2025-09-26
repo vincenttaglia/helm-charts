@@ -34,7 +34,7 @@ spec:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       containers:
         - name: {{ $componentName }}
-          image: "{{ .Values.components.reader.image.repository }}:{{ .Values.components.reader.image.tag }}"
+          image: "{{ $values.components.reader.image.repository }}:{{ $values.components.reader.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args: ["start", "-c", "/config/config.yaml"]
           {{- include "firehose-ethereum.envVars" (dict "context" . "component" $values.components.reader) | nindent 10 }}

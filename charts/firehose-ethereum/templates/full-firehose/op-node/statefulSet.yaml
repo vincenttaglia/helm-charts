@@ -1,7 +1,7 @@
 {{- $values := $.Values.fullMode }}
 {{- $componentName := "op-node" }}
 {{- $componentLabel := include "firehose-ethereum.componentLabelFor" $componentName }}
-{{- if and (eq .Values.mode "full") $values.components.op-node.enabled }}
+{{- if and (eq .Values.mode "full") $values.components.opnode.enabled }}
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
@@ -24,16 +24,16 @@ spec:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       containers:
         - name: {{ $componentName }}
-          image: {{ .Values.components.op-node.image.repository }}:{{ .Values.components.op-node.image.tag }}
+          image: {{ .Values.components.opnode.image.repository }}:{{ .Values.components.opnode.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - op-node
-            - --network={{ .Values.components.op-node.config.network }}
-            - --l1=h{{ .Values.components.op-node.config.l1 }}
-            - --l1.beacon={{ .Values.components.op-node.config.l1-beacon }}
-            - --l1.beacon-archiver={{ .Values.components.op-node.config.l1-beacon }}
+            - --network={{ .Values.components.opnode.config.network }}
+            - --l1=h{{ .Values.components.opnode.config.l1 }}
+            - --l1.beacon={{ .Values.components.opnode.config.l1beacon }}
+            - --l1.beacon-archiver={{ .Values.components.opnode.config.l1beacon }}
             - --l1.beacon.fetch-all-sidecars=true
-            - --l1.rpckind={{ .Values.components.op-node.config.rpckind }}
+            - --l1.rpckind={{ .Values.components.opnode.config.rpckind }}
             - --l1.trustrpc=true
             - --l2=http://{{ .Release.Name }}-firehose-reader-svc:8551
             - --l2.enginekind=geth
