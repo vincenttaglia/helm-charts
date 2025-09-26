@@ -5,30 +5,15 @@ entries:
       lookupName: ghcr.io/streamingfast/firehose-ethereum
     apiVersion: v2
     appVersion: v2.13.1-geth
-    created: "2025-09-26T01:58:43.939196357Z"
+    created: "2025-09-25T20:58:41.301251639-05:00"
     description: A Helm chart for Kubernetes
-    digest: 9feafa08346e19dc01d68a3247ad6a231af568a5d99d4f14a6775626d372032a
+    digest: 2c6768fe53c4dde3e951d8ed15efcd27f970c8b1dc037b81977fb3837ee3b660
     keywords:
     - firehose
     - substreams
     name: firehose-ethereum
     type: application
     urls:
-    - https://github.com/vincenttaglia/helm-charts/releases/download/firehose-ethereum-1.2.6/firehose-ethereum-1.2.6.tgz
+    - https://vincenttaglia.github.io/helm-charts/firehose-ethereum-1.2.6.tgz
     version: 1.2.6
-  - annotations:
-      lookupName: ghcr.io/streamingfast/firehose-ethereum
-    apiVersion: v2
-    appVersion: v2.13.1-geth
-    created: "2025-09-25T20:41:03.624224045-05:00"
-    description: A Helm chart for Kubernetes
-    digest: 2813f58260bf750420593538225605d8f83cd48241e890e01caee11bd3765b49
-    keywords:
-    - firehose
-    - substreams
-    name: firehose-ethereum
-    type: application
-    urls:
-    - https://vincenttaglia.github.io/helm-charts/firehose-ethereum-1.2.5.tgz
-    version: 1.2.5
-generated: "2025-09-26T01:58:43.939203931Z"
+generated: "2025-09-25T20:58:41.300347926-05:00"
