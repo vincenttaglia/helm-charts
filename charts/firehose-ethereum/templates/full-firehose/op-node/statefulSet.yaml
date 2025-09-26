@@ -63,8 +63,6 @@ spec:
               containerPort: 9222
               protocol: UDP
           volumeMounts:
-            - name: storage
-              mountPath: /data
             - name: jwt-secret
               mountPath: /jwt
               readOnly: true
