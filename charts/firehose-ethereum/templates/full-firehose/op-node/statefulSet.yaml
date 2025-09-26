@@ -24,16 +24,16 @@ spec:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       containers:
         - name: {{ $componentName }}
-          image: {{ .Values.components.opnode.image.repository }}:{{ .Values.components.opnode.image.tag }}
+          image: {{ $values.components.opnode.image.repository }}:{{ $values.components.opnode.image.tag }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - op-node
-            - --network={{ .Values.components.opnode.config.network }}
-            - --l1=h{{ .Values.components.opnode.config.l1 }}
-            - --l1.beacon={{ .Values.components.opnode.config.l1beacon }}
-            - --l1.beacon-archiver={{ .Values.components.opnode.config.l1beacon }}
+            - --network={{ $values.components.opnode.config.network }}
+            - --l1=h{{ $values.components.opnode.config.l1 }}
+            - --l1.beacon={{ $values.components.opnode.config.l1beacon }}
+            - --l1.beacon-archiver={{ $values.components.opnode.config.l1beacon }}
             - --l1.beacon.fetch-all-sidecars=true
-            - --l1.rpckind={{ .Values.components.opnode.config.rpckind }}
+            - --l1.rpckind={{ $values.components.opnode.config.rpckind }}
             - --l1.trustrpc=true
             - --l2=http://{{ .Release.Name }}-firehose-reader-svc:8551
             - --l2.enginekind=geth
