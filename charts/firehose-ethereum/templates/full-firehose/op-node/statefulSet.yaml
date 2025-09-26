@@ -29,7 +29,7 @@ spec:
           command:
             - op-node
             - --network={{ $values.components.opnode.config.network }}
-            - --l1=h{{ $values.components.opnode.config.l1 }}
+            - --l1={{ $values.components.opnode.config.l1 }}
             - --l1.beacon={{ $values.components.opnode.config.l1beacon }}
             - --l1.beacon-archiver={{ $values.components.opnode.config.l1beacon }}
             - --l1.beacon.fetch-all-sidecars=true
