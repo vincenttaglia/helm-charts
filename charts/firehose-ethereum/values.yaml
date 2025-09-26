@@ -240,6 +240,17 @@ fullMode:
       config:
         # -- Indexer arguments
         log-to-file: false
+    
+    op-node:
+      enabled: false
+
+      image:
+        repository: us-docker.pkg.dev/oplabs-tools-artifacts/images/op-node
+        tag: op-node/v1.13.x
+        
+      config:
+        network: op-mainnet
+        rpckind: standard
 
 chunkMode:
   # -- Mode to use in chunk processing
