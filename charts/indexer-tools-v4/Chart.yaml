@@ -1,0 +1,17 @@
+apiVersion: v2
+name: indexer-tools-v4
+description: Dashboard for The Graph Protocol indexers — manage allocations, monitor QoS, track query fees, and queue indexer-agent actions
+type: application
+version: 0.1.0
+appVersion: "4.0.0"
+home: https://github.com/vincenttaglia/indexer-tools-v4
+sources:
+  - https://github.com/vincenttaglia/indexer-tools-v4
+keywords:
+  - the-graph
+  - indexer
+  - dashboard
+  - vue
+maintainers:
+  - name: Vincent Taglia
+    email: info@vincenttaglia.com

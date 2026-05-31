@@ -1,0 +1,175 @@
+# Default values for graph-indexer-mcp.
+#
+# The MCP server supports two transports:
+#   - http  (chart default) — Streamable HTTP listener on config.httpPort (8080),
+#     fronted by a ClusterIP Service, with real /healthz and /readyz probes.
+#   - stdio — no network listener; the pod runs idle and operators attach with
+#     `kubectl exec`. No Service is created; probes use pgrep.
+#
+# In http mode the authorizer can be "static" (ACCESS_LEVEL) or "k8s-rbac"
+# (per-caller authorization via Kubernetes TokenReview/SubjectAccessReview).
+# k8s-rbac REQUIRES transport=http.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/vincenttaglia/graph-indexer-mcp
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  # Auto-mount the SA token. The k8s-rbac authorizer needs it to call
+  # TokenReview/SubjectAccessReview; the static authorizer does not. The
+  # template forces this on automatically when authz=k8s-rbac.
+  automount: false
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 10001
+  runAsGroup: 10001
+  fsGroup: 10001
+  seccompProfile:
+    type: RuntimeDefault
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+# --- MCP configuration ---------------------------------------------------------
+config:
+  # Transport: "http" (network listener + Service) or "stdio" (exec-only).
+  transport: http
+  # Authorization: "static" (ACCESS_LEVEL) or "k8s-rbac" (requires http).
+  authz: static
+  httpPort: 8080
+  httpHost: "0.0.0.0"
+  # TokenReview audience for caller projected SA tokens (k8s-rbac only). Leave
+  # empty to accept the apiserver default audience.
+  k8sApiAudience: ""
+
+  # Indexer identity (required).
+  indexerAddress: "0x0000000000000000000000000000000000000000"
+  # Protocol network the indexer-agent submits actions against (Horizon).
+  protocolNetwork: "arbitrum-one"
+
+  # Internal-cluster data source endpoints. Gateway URLs that embed an API key
+  # in the path are secret material — set those under `secrets` below, not here.
+  graphNodeStatusUrl: "http://graph-node-query.graph-node.svc.cluster.local:8030/graphql"
+  indexerAgentUrl: "http://indexer-agent.indexer-agent.svc.cluster.local:18000/graphql"
+  graphmanApiUrl: "http://graph-node-query.graph-node.svc.cluster.local:8050"
+
+  # Access control: read_only | read_write | read_write_destructive | full
+  accessLevel: "read_write"
+  accessOverridesAllow: ""
+  # graphman destructive ops are disabled in this build; the deny entries are
+  # harmless no-ops kept as a safe default for when they return.
+  accessOverridesDeny: "graphman_drop_deployment,graphman_rewind_deployment"
+
+  # Optimization parameters.
+  maxAllocations: "15"
+  maxAllocationPct: "0.25"
+  riskyDeploymentCapPct: "0.05"
+  minSignal: "100"
+  gasEstimateGrt: "0.3"
+  minRewardsGrt28d: "10"
+
+  # Comma-separated deployment IPFS-hash lists.
+  whitelist: ""
+  blacklist: ""
+  frozenlist: ""
+  riskyDeployments: ""
+
+# --- Secret handling -----------------------------------------------------------
+# The chart does NOT create a Secret. Create it out-of-band with your secret
+# tooling (kubectl / External Secrets / Sealed Secrets / Vault / SOPS) and point
+# existingSecret at it. This keeps the graphman token and the gateway URLs (which
+# embed API keys in the path) out of the chart values and Helm release history.
+#
+# The Secret must carry these keys (consumed via envFrom -> secretRef):
+#   GRAPHMAN_AUTH_TOKEN      (required)
+#   NETWORK_SUBGRAPH_URL     (required)
+#   EBO_SUBGRAPH_URL         (required)
+#   QOS_SUBGRAPH_URL         (required)
+#   GRAPH_NODE_POSTGRES_URL  (optional; enables the subgraph_size tools)
+#
+# Example:
+#   kubectl create secret generic graph-indexer-mcp \
+#     --from-literal=GRAPHMAN_AUTH_TOKEN=... \
+#     --from-literal=NETWORK_SUBGRAPH_URL=https://gateway.thegraph.com/api/<KEY>/subgraphs/id/<ID> \
+#     --from-literal=EBO_SUBGRAPH_URL=... \
+#     --from-literal=QOS_SUBGRAPH_URL=...
+#
+# Rendering fails with an explicit message if this is unset.
+existingSecret: ""
+
+# --- k8s-rbac authorization ----------------------------------------------------
+# Only consulted when config.authz == "k8s-rbac".
+rbac:
+  # Create the synthetic-resource ClusterRoles (mcp-readonly/operator/admin) and
+  # bind the pod SA to system:auth-delegator (needed for TokenReview/SAR).
+  create: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Probes. The defaults below are applied per-transport by the templates:
+#   http  → httpGet /healthz (live) and /readyz (ready) on the http port
+#   stdio → exec pgrep of the node process
+# Override here to customize.
+livenessProbe: {}
+readinessProbe: {}
+
+# Extra environment variables / sources.
+extraEnv: []
+  # - name: RPC_ENDPOINTS
+  #   value: '{"arbitrum-one":{"local":"http://erigon:8547"}}'
+envFrom: []
+
+# Writable scratch for node temp files (needed with readOnlyRootFilesystem).
+volumes:
+  - name: tmp
+    emptyDir:
+      sizeLimit: 64Mi
+  - name: home
+    emptyDir:
+      sizeLimit: 16Mi
+
+volumeMounts:
+  - name: tmp
+    mountPath: /tmp
+  - name: home
+    mountPath: /home/mcp
+
+nodeSelector: {}
+tolerations: []
+affinity: {}

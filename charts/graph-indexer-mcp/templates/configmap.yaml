@@ -1,0 +1,44 @@
+{{- include "graph-indexer-mcp.validate" . -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "graph-indexer-mcp.fullname" . }}
+  labels:
+    {{- include "graph-indexer-mcp.labels" . | nindent 4 }}
+data:
+  # Transport + authorization.
+  MCP_TRANSPORT: {{ .Values.config.transport | quote }}
+  MCP_AUTHZ: {{ .Values.config.authz | quote }}
+  MCP_HTTP_PORT: {{ .Values.config.httpPort | quote }}
+  MCP_HTTP_HOST: {{ .Values.config.httpHost | quote }}
+  {{- with .Values.config.k8sApiAudience }}
+  K8S_API_AUDIENCE: {{ . | quote }}
+  {{- end }}
+
+  # Indexer identity.
+  INDEXER_ADDRESS: {{ .Values.config.indexerAddress | quote }}
+  PROTOCOL_NETWORK: {{ .Values.config.protocolNetwork | quote }}
+
+  # Data source endpoints (non-secret).
+  GRAPH_NODE_STATUS_URL: {{ .Values.config.graphNodeStatusUrl | quote }}
+  INDEXER_AGENT_URL: {{ .Values.config.indexerAgentUrl | quote }}
+  GRAPHMAN_API_URL: {{ .Values.config.graphmanApiUrl | quote }}
+
+  # Access control.
+  ACCESS_LEVEL: {{ .Values.config.accessLevel | quote }}
+  ACCESS_OVERRIDES_ALLOW: {{ .Values.config.accessOverridesAllow | quote }}
+  ACCESS_OVERRIDES_DENY: {{ .Values.config.accessOverridesDeny | quote }}
+
+  # Optimization parameters.
+  MAX_ALLOCATIONS: {{ .Values.config.maxAllocations | quote }}
+  MAX_ALLOCATION_PCT: {{ .Values.config.maxAllocationPct | quote }}
+  RISKY_DEPLOYMENT_CAP_PCT: {{ .Values.config.riskyDeploymentCapPct | quote }}
+  MIN_SIGNAL: {{ .Values.config.minSignal | quote }}
+  GAS_ESTIMATE_GRT: {{ .Values.config.gasEstimateGrt | quote }}
+  MIN_REWARDS_GRT_28D: {{ .Values.config.minRewardsGrt28d | quote }}
+
+  # Lists.
+  WHITELIST: {{ .Values.config.whitelist | quote }}
+  BLACKLIST: {{ .Values.config.blacklist | quote }}
+  FROZENLIST: {{ .Values.config.frozenlist | quote }}
+  RISKY_DEPLOYMENTS: {{ .Values.config.riskyDeployments | quote }}

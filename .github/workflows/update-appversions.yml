@@ -12,6 +12,8 @@ on:
 #     lighthouse=sigp/lighthouse
 env:
   CHART_MAP: |
+    indexer-tools-v4=vincenttaglia/indexer-tools-v4
+    graph-indexer-mcp=vincenttaglia/graph-indexer-mcp
 
 jobs:
   check-updates:

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "indexer-tools-v4.fullname" . }}
+  labels:
+    {{- include "indexer-tools-v4.labels" . | nindent 4 }}
+data:
+  # Only non-secret config lives here. GRAPH_API_KEY / DRPC_API_KEY are sourced
+  # from existingSecret (if set) via the Deployment env, not from this ConfigMap.
+  DEFAULT_ACCOUNTS: |
+    {{- .Values.config.defaultAccounts | nindent 4 }}

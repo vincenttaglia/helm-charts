@@ -1,0 +1,34 @@
+{{ .Chart.Name }} has been deployed.
+
+{{- if .Values.ingress.enabled }}
+
+The dashboard is reachable via Ingress at:
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+
+Get the application URL by running:
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "indexer-tools-v4.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+
+Get the application URL by running (the LoadBalancer IP may take a moment to provision):
+  kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "indexer-tools-v4.fullname" . }}
+{{- else }}
+
+Get the application URL by running:
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "indexer-tools-v4.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:{{ .Values.containerPort }}
+  echo "Visit http://127.0.0.1:8080 to use the dashboard"
+{{- end }}
+
+Configure indexer accounts via config.defaultAccounts (JSON array). HTTP
+agentEndpoint / graphmanEndpoint values are auto-proxied through nginx at
+container start. API keys and accounts can also be set in the in-app Settings.
+
+NOTE: VITE_* variables are build-time only (baked into the static assets during
+`docker build`) and cannot be configured at runtime via this chart.

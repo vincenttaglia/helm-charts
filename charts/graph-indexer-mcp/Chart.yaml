@@ -1,0 +1,17 @@
+apiVersion: v2
+name: graph-indexer-mcp
+description: MCP server exposing The Graph Protocol indexer operations (network/EBO/QoS subgraphs, graph-node status, indexer-agent, graphman) to MCP clients
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+home: https://github.com/vincenttaglia/graph-indexer-mcp
+sources:
+  - https://github.com/vincenttaglia/graph-indexer-mcp
+keywords:
+  - the-graph
+  - indexer
+  - mcp
+  - model-context-protocol
+maintainers:
+  - name: Vincent Taglia
+    email: info@vincenttaglia.com

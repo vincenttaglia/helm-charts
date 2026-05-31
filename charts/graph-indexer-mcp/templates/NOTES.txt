@@ -1,0 +1,32 @@
+{{ .Chart.Name }} deployed (transport={{ .Values.config.transport }}, authz={{ .Values.config.authz }}, access_level={{ .Values.config.accessLevel }}).
+
+{{- if include "graph-indexer-mcp.networked" . }}
+
+HTTP transport is listening on port {{ .Values.config.httpPort }} behind a {{ .Values.service.type }} Service.
+Reach the Streamable HTTP endpoint by port-forwarding:
+
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "graph-indexer-mcp.fullname" . }} {{ .Values.service.port }}:{{ .Values.service.port }}
+  # MCP endpoint: http://127.0.0.1:{{ .Values.service.port }}/  (health: /healthz, /readyz)
+
+Put TLS + an ingress/gateway in front before exposing this outside the cluster —
+bearer tokens (k8s-rbac) must not travel in plaintext.
+{{- if eq .Values.config.authz "k8s-rbac" }}
+
+k8s-rbac is enabled. Bind callers to a permission tier, e.g.:
+
+  kubectl create clusterrolebinding mcp-operators \
+    --clusterrole={{ include "graph-indexer-mcp.fullname" . }}-operator \
+    --group=oidc:indexer-operators
+{{- end }}
+{{- else }}
+
+stdio transport: no Service is created. Attach with kubectl exec:
+
+  kubectl --namespace {{ .Release.Namespace }} exec -it deploy/{{ include "graph-indexer-mcp.fullname" . }} -- node dist/index.js
+
+Set config.transport=http for a network-reachable server with a Service.
+{{- end }}
+
+Secrets (graphman token, gateway URLs, postgres DSN) come from the Secret named
+by existingSecret ({{ .Values.existingSecret }}) — the chart does not create or
+store them.

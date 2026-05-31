@@ -1,0 +1,57 @@
+{{- if and (eq .Values.config.authz "k8s-rbac") .Values.rbac.create -}}
+# Synthetic-resource ClusterRoles for MCP_AUTHZ=k8s-rbac. These grant no access
+# to real Kubernetes objects; they exist so the server can ask the apiserver, via
+# SubjectAccessReview, "is this caller allowed permission class <X>?" — phrased as
+# a SAR against the synthetic resource tools.mcp.thegraph.io with the permission
+# class as the verb. The three tiers mirror the static ACCESS_LEVEL ladder.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "graph-indexer-mcp.fullname" . }}-readonly
+  labels:
+    {{- include "graph-indexer-mcp.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["mcp.thegraph.io"]
+    resources: ["tools"]
+    verbs: ["read"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "graph-indexer-mcp.fullname" . }}-operator
+  labels:
+    {{- include "graph-indexer-mcp.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["mcp.thegraph.io"]
+    resources: ["tools"]
+    verbs: ["read", "agent_queue", "graphman_safe"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "graph-indexer-mcp.fullname" . }}-admin
+  labels:
+    {{- include "graph-indexer-mcp.labels" . | nindent 4 }}
+rules:
+  - apiGroups: ["mcp.thegraph.io"]
+    resources: ["tools"]
+    verbs: ["read", "agent_queue", "agent_approve", "graphman_safe", "graphman_destructive"]
+---
+# Bind the pod ServiceAccount to system:auth-delegator so the authorizer can
+# call TokenReview + SubjectAccessReview. Without this both return 403 and the
+# authorizer fails closed (every tool call denied).
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ include "graph-indexer-mcp.fullname" . }}-auth-delegator
+  labels:
+    {{- include "graph-indexer-mcp.labels" . | nindent 4 }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "graph-indexer-mcp.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  kind: ClusterRole
+  name: system:auth-delegator
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
