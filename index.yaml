@@ -1,0 +1,49 @@
+apiVersion: v1
+entries:
+  graph-indexer-mcp:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2026-05-31T23:11:58.203783744Z"
+    description: MCP server exposing The Graph Protocol indexer operations (network/EBO/QoS
+      subgraphs, graph-node status, indexer-agent, graphman) to MCP clients
+    digest: c7b2ec0d8ce8ed4d4a3afc884242bd36368760793e5c27cfb7cfdec67fa8acf4
+    home: https://github.com/vincenttaglia/graph-indexer-mcp
+    keywords:
+    - the-graph
+    - indexer
+    - mcp
+    - model-context-protocol
+    maintainers:
+    - email: info@vincenttaglia.com
+      name: Vincent Taglia
+    name: graph-indexer-mcp
+    sources:
+    - https://github.com/vincenttaglia/graph-indexer-mcp
+    type: application
+    urls:
+    - https://github.com/vincenttaglia/helm-charts/releases/download/graph-indexer-mcp-0.1.0/graph-indexer-mcp-0.1.0.tgz
+    version: 0.1.0
+  indexer-tools-v4:
+  - apiVersion: v2
+    appVersion: 4.0.0
+    created: "2026-05-31T23:11:58.327934197Z"
+    description: Dashboard for The Graph Protocol indexers — manage allocations, monitor
+      QoS, track query fees, and queue indexer-agent actions
+    digest: 69ab41e5ded78f6e1ab8b065123731bb64be42460cbb5ca8288e31b6157c8614
+    home: https://github.com/vincenttaglia/indexer-tools-v4
+    keywords:
+    - the-graph
+    - indexer
+    - dashboard
+    - vue
+    maintainers:
+    - email: info@vincenttaglia.com
+      name: Vincent Taglia
+    name: indexer-tools-v4
+    sources:
+    - https://github.com/vincenttaglia/indexer-tools-v4
+    type: application
+    urls:
+    - https://github.com/vincenttaglia/helm-charts/releases/download/indexer-tools-v4-0.1.0/indexer-tools-v4-0.1.0.tgz
+    version: 0.1.0
+generated: "2026-05-31T23:11:58.327939435Z"
