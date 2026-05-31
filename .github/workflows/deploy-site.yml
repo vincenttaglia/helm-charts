@@ -1,0 +1,45 @@
+name: Deploy Site
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "site/**"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - name: Install and build
+        run: |
+          cd site
+          npm ci
+          npm run build
+
+      - name: Preserve chart index
+        run: |
+          cd site/dist
+          if git ls-remote --exit-code origin gh-pages 2>/dev/null; then
+            git fetch origin gh-pages
+            git show origin/gh-pages:index.yaml > index.yaml 2>/dev/null || true
+          fi
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site/dist
+          keep_files: false
