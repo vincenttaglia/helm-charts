@@ -2,7 +2,7 @@ apiVersion: v2
 name: graph-indexer-mcp
 description: MCP server exposing The Graph Protocol indexer operations (network/EBO/QoS subgraphs, graph-node status, indexer-agent, graphman) to MCP clients
 type: application
-version: 0.1.0
+version: 0.2.0
 appVersion: "0.1.0"
 home: https://github.com/vincenttaglia/graph-indexer-mcp
 sources:
