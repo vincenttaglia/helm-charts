@@ -3,6 +3,28 @@ entries:
   graph-indexer-mcp:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2026-06-01T00:29:23.365359601Z"
+    description: MCP server exposing The Graph Protocol indexer operations (network/EBO/QoS
+      subgraphs, graph-node status, indexer-agent, graphman) to MCP clients
+    digest: d3ef5b15f88fdcdca54200f20cde3409eb5877d7ea27cd4cbcd3cbdb7ba044c2
+    home: https://github.com/vincenttaglia/graph-indexer-mcp
+    keywords:
+    - the-graph
+    - indexer
+    - mcp
+    - model-context-protocol
+    maintainers:
+    - email: info@vincenttaglia.com
+      name: Vincent Taglia
+    name: graph-indexer-mcp
+    sources:
+    - https://github.com/vincenttaglia/graph-indexer-mcp
+    type: application
+    urls:
+    - https://github.com/vincenttaglia/helm-charts/releases/download/graph-indexer-mcp-0.2.0/graph-indexer-mcp-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2026-05-31T23:11:58.203783744Z"
     description: MCP server exposing The Graph Protocol indexer operations (network/EBO/QoS
       subgraphs, graph-node status, indexer-agent, graphman) to MCP clients
@@ -46,4 +68,4 @@ entries:
     urls:
     - https://github.com/vincenttaglia/helm-charts/releases/download/indexer-tools-v4-0.1.0/indexer-tools-v4-0.1.0.tgz
     version: 0.1.0
-generated: "2026-05-31T23:11:58.327939435Z"
+generated: "2026-06-01T00:29:23.365370497Z"
