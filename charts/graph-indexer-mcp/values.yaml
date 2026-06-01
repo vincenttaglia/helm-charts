@@ -94,26 +94,30 @@ config:
   riskyDeployments: ""
 
 # --- Secret handling -----------------------------------------------------------
-# The chart does NOT create a Secret. Create it out-of-band with your secret
-# tooling (kubectl / External Secrets / Sealed Secrets / Vault / SOPS) and point
-# existingSecret at it. This keeps the graphman token and the gateway URLs (which
-# embed API keys in the path) out of the chart values and Helm release history.
+# The chart does NOT create a Secret. Supply the sensitive env vars yourself via
+# EITHER (or both) of:
+#   - existingSecret: name of a Secret you manage (kubectl / External Secrets /
+#     Sealed Secrets / Vault / SOPS). It is added as an envFrom -> secretRef, so
+#     every key in it becomes an env var. This keeps secrets out of the chart
+#     values and the Helm release history.
+#   - extraEnv / envFrom (below): inline env vars or references to other
+#     ConfigMaps/Secrets. Use extraEnv[].valueFrom.secretKeyRef to pull
+#     individual keys without a dedicated Secret object.
 #
-# The Secret must carry these keys (consumed via envFrom -> secretRef):
-#   GRAPHMAN_AUTH_TOKEN      (required)
-#   NETWORK_SUBGRAPH_URL     (required)
-#   EBO_SUBGRAPH_URL         (required)
-#   QOS_SUBGRAPH_URL         (required)
+# The app's entrypoint requires these env vars (it exits 64 if any are missing),
+# so make sure they are provided by one of the mechanisms above:
+#   GRAPHMAN_AUTH_TOKEN      (required, secret)
+#   NETWORK_SUBGRAPH_URL     (required, secret — embeds an API key)
+#   EBO_SUBGRAPH_URL         (required, secret — embeds an API key)
+#   QOS_SUBGRAPH_URL         (required, secret — embeds an API key)
 #   GRAPH_NODE_POSTGRES_URL  (optional; enables the subgraph_size tools)
 #
-# Example:
+# Example Secret for existingSecret:
 #   kubectl create secret generic graph-indexer-mcp \
 #     --from-literal=GRAPHMAN_AUTH_TOKEN=... \
 #     --from-literal=NETWORK_SUBGRAPH_URL=https://gateway.thegraph.com/api/<KEY>/subgraphs/id/<ID> \
 #     --from-literal=EBO_SUBGRAPH_URL=... \
 #     --from-literal=QOS_SUBGRAPH_URL=...
-#
-# Rendering fails with an explicit message if this is unset.
 existingSecret: ""
 
 # --- k8s-rbac authorization ----------------------------------------------------
@@ -149,11 +153,21 @@ autoscaling:
 livenessProbe: {}
 readinessProbe: {}
 
-# Extra environment variables / sources.
+# Extra environment variables. Can carry the required secret env vars directly,
+# either inline or via secretKeyRef, instead of (or alongside) existingSecret.
 extraEnv: []
+  # - name: GRAPHMAN_AUTH_TOKEN
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name: my-mcp-secret
+  #       key: GRAPHMAN_AUTH_TOKEN
   # - name: RPC_ENDPOINTS
   #   value: '{"arbitrum-one":{"local":"http://erigon:8547"}}'
+
+# Extra envFrom sources (additional ConfigMaps/Secrets merged into the env).
 envFrom: []
+  # - secretRef:
+  #     name: my-mcp-secret
 
 # Writable scratch for node temp files (needed with readOnlyRootFilesystem).
 volumes:

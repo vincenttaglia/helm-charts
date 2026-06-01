@@ -61,13 +61,6 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
-The user-managed Secret holding sensitive env vars (see secret.yaml guard).
-*/}}
-{{- define "graph-indexer-mcp.secretName" -}}
-{{- required "graph-indexer-mcp: existingSecret is required (see values.yaml)." .Values.existingSecret }}
-{{- end }}
-
-{{/*
 Whether the MCP server exposes a network listener (http transport only).
 Returns "true" when networked, "" otherwise.
 */}}

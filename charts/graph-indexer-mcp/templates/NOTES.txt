@@ -27,6 +27,10 @@ stdio transport: no Service is created. Attach with kubectl exec:
 Set config.transport=http for a network-reachable server with a Service.
 {{- end }}
 
-Secrets (graphman token, gateway URLs, postgres DSN) come from the Secret named
-by existingSecret ({{ .Values.existingSecret }}) — the chart does not create or
-store them.
+Sensitive env vars (GRAPHMAN_AUTH_TOKEN, gateway subgraph URLs, postgres DSN)
+must be supplied by you — the chart does not create a Secret. Provide them via
+{{- if .Values.existingSecret }} existingSecret ({{ .Values.existingSecret }}).
+{{- else }} existingSecret (a Secret you manage) and/or extraEnv / envFrom.
+WARNING: none are set — the container entrypoint will exit 64 on missing
+required vars until you supply them.
+{{- end }}
